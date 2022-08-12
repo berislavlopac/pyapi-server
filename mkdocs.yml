@@ -1,0 +1,9 @@
+site_name: PyAPI Server
+site_url: https://pyapi-server.readthedocs.io
+repo_url: https://github.com/berislavlopac/pyapi-server
+site_description: Lightweight API framework using an OpenAPI spec for routing and validation.
+site_author: Berislav Lopac <berislav@lopac.net>
+theme:
+  name: readthedocs
+nav:
+  - Introduction: 'index.md'
