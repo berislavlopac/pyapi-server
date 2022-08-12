@@ -35,8 +35,8 @@ The directory `src/examples/server/` contains a working example PyAPI Server app
 To run the example, follow these steps inside a Python `virtualenv`:
 
 1. Install [`poetry`](https://poetry.eustace.io/docs/#installation)
-2. Update dependencies: `poetry update`
-3. Start the PyAPI example server: `uvicorn examples.server.server:app --reload --host 0.0.0.0 --port 5000 --log-level debug`
+2. Install PyAPI server with optional dependencies: `poetry install -E uvicorn`
+3. Start the PyAPI example server: `uvicorn example.server:app --reload --host 0.0.0.0 --port 5000 --log-level debug`
 
 
 ## Application
@@ -97,7 +97,7 @@ async def get_pet_by_id(request):
 
 ### Setting Endpoints on Application
 
-The OpenAPI spec defines the endpoints ("paths") that the API handles, as well as the requests and responses it can recognise. Each endpoint has a [field](https://swagger.io/specification/#operation-object) called `operationId`, which is supposed to be globally unique; Pyotr takes advantage of this field to find the corresponding endpoint function.
+The OpenAPI spec defines the endpoints ("paths") that the API handles, as well as the requests and responses it can recognise. Each endpoint has a [field](https://swagger.io/specification/#operation-object) called `operationId`, which is supposed to be globally unique; PyAPI server takes advantage of this field to find the corresponding endpoint function.
 
 Endpoint functions can be defined in several ways:
 

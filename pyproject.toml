@@ -12,11 +12,9 @@ repository = "https://github.com/berislavlopac/pyapi-server"
 python = "^3.8"
 PyYAML = "^6.0"
 stringcase = "^1.2.0"
-typing-extensions = "^4.1.1"
-uvicorn = "^0.17.6"
-httpx = "^0.22.0"
 starlette = "^0.19.0"
 openapi-core = "^0.14.2"
+uvicorn = {version = "^0.18.2", optional = true}
 
 [tool.poetry.extras]
 uvicorn = ["uvicorn"]
@@ -36,7 +34,7 @@ tox = ">=3.24.5"
 toml = ">=0.10.2"
 pytest-spec = ">=3.2.0"
 tox-poetry = ">=0.4.1"
-isort = "^5.10.1"
+isort = ">=5.10.1"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
