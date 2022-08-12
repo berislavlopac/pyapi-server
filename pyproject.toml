@@ -1,0 +1,77 @@
+[tool.poetry]
+name = "pyapi-server"
+version = "0.1.0"
+description = "Lightweight API framework using an OpenAPI spec for routing and validation."
+authors = ["Berislav Lopac <berislav@lopac.net>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://pyapi-server.readthedocs.io"
+repository = "https://github.com/berislavlopac/pyapi-server"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+PyYAML = "^6.0"
+stringcase = "^1.2.0"
+typing-extensions = "^4.1.1"
+uvicorn = "^0.17.6"
+httpx = "^0.22.0"
+starlette = "^0.19.0"
+openapi-core = "^0.14.2"
+
+[tool.poetry.extras]
+uvicorn = ["uvicorn"]
+
+[tool.poetry.dev-dependencies]
+mkdocs = ">=1.2.3"
+pytest-asyncio = ">=0.18.3"
+pytest-cov = ">=3.0.0"
+pytest-flake8 = ">=1.1.1"
+pytest-mypy = ">=0.9.1"
+requests = ">=2.27.1"
+pytest = ">=7.1.1"
+black = ">=22.1.0"
+pydocstyle = ">=6.1.1"
+mypy = ">=0.942"
+tox = ">=3.24.5"
+toml = ">=0.10.2"
+pytest-spec = ">=3.2.0"
+tox-poetry = ">=0.4.1"
+isort = "^5.10.1"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = [ "pyapi/", ]
+omit = [ "*/tests/*", ]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+fail_under = 90
+exclude_lines = [ "pragma: no cover", "@abstract",]
+
+[tool.black]
+line-length = 96
+target-version = ['py38', 'py39', 'py310']
+verbose = false
+skip-string-normalization = false
+
+[tool.isort]
+profile = "black"
+line_length = 96
+filter_files = true
+force_alphabetical_sort_within_sections = true
+
+[tool.pydocstyle]
+add-ignore = "D104, D107, D212, D401"
+convention = "google"
+match-dir = "^(?!tests|examples).*"
+
+[tool.mypy]
+mypy_path = "src/"
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
