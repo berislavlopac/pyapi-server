@@ -7,6 +7,9 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://pyapi-server.readthedocs.io"
 repository = "https://github.com/berislavlopac/pyapi-server"
+packages = [
+    { include = "pyapi/server/" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
