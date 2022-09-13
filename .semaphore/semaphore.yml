@@ -1,0 +1,44 @@
+version: v1.0
+name: Python
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+blocks:
+  - name: Code checks
+    dependencies: []
+    task:
+      jobs:
+        - name: checks
+          commands:
+            - sem-version python 3.8
+            - checkout
+            - python -m pip install -U pip poetry tox-poetry
+            - python -m tox -e checks
+  - name: Unit tests
+    dependencies: ["Code checks"]
+    task:
+      jobs:
+        - name: tests
+          matrix:
+            - env_var: PY_VERSION
+              values: [ "3.8", "3.9"]  #, "3.10" ]
+          commands:
+            - sem-version python $PY_VERSION
+            - checkout
+            - python -m pip install -U pip poetry tox-poetry
+            - python -m tox -e py"${PY_VERSION//.}"
+  - name: Documentation
+    dependencies: ["Code checks"]
+    task:
+      jobs:
+        - name: docs
+          commands:
+            - sem-version python 3.8
+            - checkout
+            - python -m pip install -U pip mkdocs
+            - python -m mkdocs build
+      epilogue:
+        on_pass:
+          commands:
+            - artifact push job site
