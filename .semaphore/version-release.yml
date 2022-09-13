@@ -6,6 +6,7 @@ agent:
     os_image: ubuntu2004
 blocks:
   - name: Check version
+    dependencies: ["Unit tests"]
     task:
       prologue:
         commands:
@@ -25,13 +26,9 @@ blocks:
             - echo "PYPI_RELEASE_VERSION=$RELEASE_VERSION" >> pypi.env
             - echo "PYPI_RELEASE_TYPE=$RELEASE_TYPE" >> pypi.env
             - echo "PYPI_RELEASE_NOTES_FILE=$RELEASE_NOTES_FILE" >> pypi.env
-            - echo "PYPI_INDEX_URL=https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi" >> pypi.env
             - echo "Package details:"
             - cat pypi.env
-      epilogue:
-        on_pass:
-          commands:
-            - artifact push project pypi.env
+            - gh
   - name: Publish
     task:
       prologue:

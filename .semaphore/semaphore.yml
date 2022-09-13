@@ -44,4 +44,4 @@ blocks:
             - artifact push job site
 promotions:
   - name: Publish new release
-    pipeline_file: release-version.yml
+    pipeline_file: version-release.yml
