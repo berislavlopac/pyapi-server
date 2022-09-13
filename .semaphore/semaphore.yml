@@ -11,37 +11,48 @@ blocks:
       jobs:
         - name: checks
           commands:
-            - sem-version python 3.8
-            - checkout
-            - python -m pip install -U pip poetry tox-poetry
             - python -m tox -e checks
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - checkout
+          - python -m pip install -U pip poetry tox-poetry
   - name: Unit tests
-    dependencies: ["Code checks"]
+    dependencies:
+      - Code checks
     task:
       jobs:
         - name: tests
           matrix:
             - env_var: PY_VERSION
-              values: [ "3.8", "3.9", "3.10" ]
+              values:
+                - '3.8'
+                - '3.9'
+                - '3.10'
           commands:
-            - sem-version python $PY_VERSION
-            - checkout
-            - python -m pip install -U pip poetry tox-poetry
-            - python -m tox -e py"${PY_VERSION//.}"
+            - 'python -m tox -e py"${PY_VERSION//.}"'
+      prologue:
+        commands:
+          - sem-version python $PY_VERSION
+          - checkout
+          - python -m pip install -U pip poetry tox-poetry
   - name: Documentation
-    dependencies: ["Code checks"]
+    dependencies:
+      - Code checks
     task:
       jobs:
         - name: docs
           commands:
-            - sem-version python 3.8
-            - checkout
-            - python -m pip install -U pip mkdocs
             - python -m mkdocs build
       epilogue:
         on_pass:
           commands:
             - artifact push job site
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - checkout
+          - python -m pip install -U pip mkdocs
 promotions:
   - name: Publish new release
     pipeline_file: version-release.yml

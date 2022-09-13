@@ -6,7 +6,7 @@ agent:
     os_image: ubuntu2004
 blocks:
   - name: Check version
-    dependencies: ["Unit tests"]
+    dependencies: []
     task:
       prologue:
         commands:
@@ -17,8 +17,8 @@ blocks:
         - name: Prepare package version and other details
           commands:
             - RELEASE_VERSION=$(python -m poetry version -s)
-            - PACKAGE_NAME=$(python -m poetry version | awk '{print $1}')
-            - RELEASE_NOTES_FILE="release-notes/${RELEASE_VERSION}.md"
+            - 'PACKAGE_NAME=$(python -m poetry version | awk ''{print $1}'')'
+            - 'RELEASE_NOTES_FILE="release-notes/${RELEASE_VERSION}.md"'
             - 'if [ ! -f "$RELEASE_NOTES_FILE" ]; then echo "The release notes file \"${RELEASE_NOTES_FILE}\" does not exist."; exit 1; fi'
             - RELEASE_TYPE="release"
             - 'if [[ $RELEASE_VERSION =~ "alpha" || $RELEASE_VERSION =~ "beta" ]]; then RELEASE_TYPE="prerelease"; fi'
@@ -26,9 +26,8 @@ blocks:
             - echo "PYPI_RELEASE_VERSION=$RELEASE_VERSION" >> pypi.env
             - echo "PYPI_RELEASE_TYPE=$RELEASE_TYPE" >> pypi.env
             - echo "PYPI_RELEASE_NOTES_FILE=$RELEASE_NOTES_FILE" >> pypi.env
-            - echo "Package details:"
+            - 'echo "Package details:"'
             - cat pypi.env
-            - gh
   - name: Publish
     task:
       prologue:
@@ -38,7 +37,7 @@ blocks:
           - python -m pip install -U pip poetry
           - artifact pull project pypi.env
       jobs:
-        - name: 'Everything'
+        - name: Everything
           commands:
             - echo 'Deploying to production!'
             - cat pypi.env
