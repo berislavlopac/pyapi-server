@@ -4,23 +4,30 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu2004
+global_job_config:
+  prologue:
+    commands:
+      - checkout
 blocks:
   - name: Code checks
     dependencies: []
     task:
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - python -m pip install -U pip poetry tox tox-poetry
       jobs:
         - name: checks
           commands:
             - python -m tox -e checks
-      prologue:
-        commands:
-          - sem-version python 3.8
-          - checkout
-          - python -m pip install -U pip poetry tox-poetry
   - name: Unit tests
     dependencies:
       - Code checks
     task:
+      prologue:
+        commands:
+          - sem-version python $PY_VERSION
+          - python -m pip install -U pip poetry tox tox-poetry
       jobs:
         - name: tests
           matrix:
@@ -30,29 +37,35 @@ blocks:
                 - '3.9'
                 - '3.10'
           commands:
-            - 'python -m tox -e py"${PY_VERSION//.}"'
-      prologue:
-        commands:
-          - sem-version python $PY_VERSION
-          - checkout
-          - python -m pip install -U pip poetry tox-poetry
+            - 'PY_ENV=py"${PY_VERSION//.}"'
+            - python -m tox -e $PY_ENV
+      epilogue:
+        on_pass:
+          commands:
+            - 'test-results publish "test-reports/$PY_ENV-junit.xml"'
   - name: Documentation
     dependencies:
       - Code checks
     task:
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - python -m pip install -U pip mkdocs
       jobs:
         - name: docs
           commands:
+            - checkout
             - python -m mkdocs build
       epilogue:
         on_pass:
           commands:
             - artifact push job site
-      prologue:
+after_pipeline:
+  task:
+    jobs:
+      - name: Publish Test Results
         commands:
-          - sem-version python 3.8
-          - checkout
-          - python -m pip install -U pip mkdocs
+          - test-results gen-pipeline-report
 promotions:
   - name: Publish new release
     pipeline_file: version-release.yml

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyapi-server"
-version = "0.1.0"
+version = "0.1.0a1"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 authors = ["Berislav Lopac <berislav@lopac.net>"]
 license = "MIT"
