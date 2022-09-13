@@ -22,7 +22,7 @@ blocks:
         - name: tests
           matrix:
             - env_var: PY_VERSION
-              values: [ "3.8", "3.9"]  #, "3.10" ]
+              values: [ "3.8", "3.9", "3.10" ]
           commands:
             - sem-version python $PY_VERSION
             - checkout
@@ -42,3 +42,6 @@ blocks:
         on_pass:
           commands:
             - artifact push job site
+promotions:
+  - name: Publish new release
+    pipeline_file: release-version.yml

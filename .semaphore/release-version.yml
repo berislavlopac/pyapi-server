@@ -1,0 +1,47 @@
+version: v1.0
+name: Publish release
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+blocks:
+  - name: Check version
+    task:
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - checkout
+          - python -m pip install -U pip poetry
+      jobs:
+        - name: Prepare package version and other details
+          commands:
+            - RELEASE_VERSION=$(python -m poetry version -s)
+            - PACKAGE_NAME=$(python -m poetry version | awk '{print $1}')
+            - RELEASE_NOTES_FILE="release-notes/${RELEASE_VERSION}.md"
+            - 'if [ ! -f "$RELEASE_NOTES_FILE" ]; then echo "The release notes file \"${RELEASE_NOTES_FILE}\" does not exist."; exit 1; fi'
+            - RELEASE_TYPE="release"
+            - 'if [[ $RELEASE_VERSION =~ "alpha" || $RELEASE_VERSION =~ "beta" ]]; then RELEASE_TYPE="prerelease"; fi'
+            - echo "PYPI_PACKAGE_NAME=$PACKAGE_NAME" >> pypi.env
+            - echo "PYPI_RELEASE_VERSION=$RELEASE_VERSION" >> pypi.env
+            - echo "PYPI_RELEASE_TYPE=$RELEASE_TYPE" >> pypi.env
+            - echo "PYPI_RELEASE_NOTES_FILE=$RELEASE_NOTES_FILE" >> pypi.env
+            - echo "PYPI_INDEX_URL=https://gitlab-ci-token:$CI_JOB_TOKEN@gitlab.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi" >> pypi.env
+            - echo "Package details:"
+            - cat pypi.env
+      epilogue:
+        on_pass:
+          commands:
+            - artifact push project pypi.env
+  - name: Publish
+    task:
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - checkout
+          - python -m pip install -U pip poetry
+          - artifact pull project pypi.env
+      jobs:
+        - name: 'Everything'
+          commands:
+            - echo 'Deploying to production!'
+            - cat pypi.env
