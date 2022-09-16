@@ -1,5 +1,5 @@
 version: v1.0
-name: Python
+name: Python checks and tests
 agent:
   machine:
     type: e1-standard-2
@@ -21,6 +21,8 @@ blocks:
           commands:
             - python -m tox -e checks
   - name: Unit tests
+    run:
+      when: "branch = 'main'"
     dependencies:
       - Code checks
     task:
@@ -44,6 +46,8 @@ blocks:
           commands:
             - 'test-results publish "test-reports/$PY_ENV-junit.xml"'
   - name: Documentation
+    run:
+      when: "branch = 'main'"
     dependencies:
       - Code checks
     task:
@@ -67,5 +71,11 @@ after_pipeline:
         commands:
           - test-results gen-pipeline-report
 promotions:
+  - name: Create new release
+    pipeline_file: release-create.yml
+    auto_promote:
+      when: "branch = 'main' and result = 'passed' and tag =~ '^$'"
   - name: Publish new release
-    pipeline_file: version-release.yml
+    pipeline_file: release-publish.yml
+    auto_promote:
+      when: "branch = 'main' and result = 'passed' and tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
