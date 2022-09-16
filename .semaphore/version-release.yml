@@ -44,8 +44,10 @@ blocks:
             - artifact yank project pypi.env
   - name: Publish
     task:
+      secrets:
+        - name: pypi-credentials
       jobs:
         - name: Build and upload
           commands:
             - poetry build -f wheel
-            - poetry publish --dry-run
+            - poetry publish -u b11c -p $PYPI_PASSWORD
