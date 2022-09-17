@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyapi-server"
-version = "0.1.1"
+version = "0.2.0"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 authors = ["Berislav Lopac <berislav@lopac.net>"]
 license = "MIT"
@@ -15,9 +15,9 @@ packages = [
 python = "^3.8"
 PyYAML = "^6.0"
 stringcase = "^1.2.0"
-starlette = "^0.19.0"
-openapi-core = "^0.14.2"
-uvicorn = {version = "^0.18.2", optional = true}
+starlette = "^0.20.4"
+openapi-core = "^0.15.0"
+uvicorn = {version = "^0.18.3", optional = true}
 
 [tool.poetry.extras]
 uvicorn = ["uvicorn"]

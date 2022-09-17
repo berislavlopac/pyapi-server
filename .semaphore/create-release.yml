@@ -1,0 +1,38 @@
+version: v1.0
+name: Publish release
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+global_job_config:
+  prologue:
+    commands:
+      - sem-version python 3.8
+      - checkout
+      - python -m pip install -U pip poetry
+blocks:
+  - name: Create release
+    run:
+      when: "branch = 'main'"
+    task:
+      secrets:
+        - name: semantic-release-credentials
+      jobs:
+        - name: Collect package details
+          priority:
+            - value: 80
+              when: true
+          commands:
+            - RELEASE_VERSION=$(python -m poetry version -s)
+            - 'RELEASE_NOTES_FILE="release-notes/${RELEASE_VERSION}.md"'
+            - 'if [ ! -f "$RELEASE_NOTES_FILE" ]; then echo "The release notes file \"${RELEASE_NOTES_FILE}\" does not exist."; exit 1; fi'
+            - 'if [[ $RELEASE_VERSION =~ \.[0-9]+(a|b|rc)[0-9] ]]; then PRERELEASE="--prerelease"; fi'
+            - sem-context put release_version=$RELEASE_VERSION
+            - sem-context put prerelease=$PRERELEASE
+            - sem-context put release_notes_file=$RELEASE_NOTES_FILE
+        - name: Create release
+          priority:
+            - value: 60
+              when: true
+          commands:
+            - gh release create $(sem-context get release_version) --notes-file $(sem-context get release_notes_file) $(sem-context get prerelease)

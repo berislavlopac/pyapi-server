@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from enum import Enum
 from itertools import chain
 from pathlib import Path
 from typing import Callable, Dict, Union
 
 import yaml
-from openapi_core.spec.paths import SpecPath
 from stringcase import camelcase
 
 
@@ -33,7 +33,7 @@ class OperationSpec:
         return super().__getattribute__(name)
 
     @classmethod
-    def get_all(cls, spec: dict) -> Dict[str, OperationSpec]:
+    def get_all(cls, spec: Mapping) -> Dict[str, OperationSpec]:
         """Builds a dict of all operations in the spec."""
         return {
             op_spec["operationId"]: cls(path, method, op_spec)
@@ -49,7 +49,7 @@ class SpecFileTypes(tuple, Enum):
     YAML = ("yaml", "yml")
 
 
-def get_spec_from_file(path: Union[Path, str]) -> SpecPath:
+def get_spec_from_file(path: Union[Path, str]) -> dict:
     """Loads a local file and creates an OpenAPI `Spec` object."""
     path = Path(path)
     suffix = path.suffix[1:].lower()

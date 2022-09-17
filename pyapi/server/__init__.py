@@ -5,13 +5,11 @@ from importlib import import_module
 from inspect import iscoroutine
 from pathlib import Path
 from types import ModuleType
-from typing import Callable, Optional, Union
+from typing import Any, Callable, cast, Dict, Optional, Union
 from urllib.parse import urlsplit
 
-from openapi_core import create_spec
+from openapi_core import Spec
 from openapi_core.exceptions import OpenAPIError
-from openapi_core.shortcuts import RequestValidator, ResponseValidator
-from openapi_core.spec.paths import SpecPath
 from openapi_core.validation.exceptions import InvalidSecurity
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
@@ -19,9 +17,13 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from stringcase import snakecase
 
-from pyapi.utils import get_spec_from_file, OperationSpec
-
-from .validation import request_factory, response_factory
+from .utils import get_spec_from_file, OperationSpec
+from .validation import (
+    get_request_validator,
+    get_response_validator,
+    OpenAPIRequest,
+    OpenAPIResponse,
+)
 
 
 class Application(Starlette):
@@ -29,21 +31,29 @@ class Application(Starlette):
 
     def __init__(
         self,
-        spec: Union[SpecPath, dict],
+        spec: Union[Spec, dict],
         *,
         module: Optional[Union[str, ModuleType]] = None,
         validate_responses: bool = True,
         enforce_case: bool = True,
+        custom_formatters: Optional[Dict[str, Any]] = None,
+        custom_media_type_deserializers: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
-        if not isinstance(spec, SpecPath):
-            spec = create_spec(spec)
-        self.spec = spec
+        if isinstance(spec, dict):
+            spec = Spec.from_dict(spec)
+        self.spec: Spec = spec
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
-        self.custom_formatters = None
-        self.custom_media_type_deserializers = None
+        self.response_validator = get_response_validator(
+            custom_formatters=custom_formatters or {},
+            custom_media_type_deserializers=custom_media_type_deserializers or {},
+        )
+        self.request_validator = get_request_validator(
+            custom_formatters=custom_formatters or {},
+            custom_media_type_deserializers=custom_media_type_deserializers or {},
+        )
 
         self._operations = OperationSpec.get_all(self.spec)
         self._server_paths = {urlsplit(server["url"]).path for server in self.spec["servers"]}
@@ -84,18 +94,14 @@ class Application(Starlette):
         else:
             operation_id_key = operation_id
         try:
-            operation = self._operations[operation_id_key]
+            operation = self._operations[cast(str, operation_id_key)]
         except KeyError as ex:
             raise ValueError(f"Unknown operationId: {operation_id}.") from ex
 
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
-            openapi_request = await request_factory(request)
-            validated_request = RequestValidator(
-                self.spec,
-                custom_formatters=self.custom_formatters,
-                custom_media_type_deserializers=self.custom_media_type_deserializers,
-            ).validate(openapi_request)
+            openapi_request = await OpenAPIRequest.from_request(request)
+            validated_request = self.request_validator.validate(self.spec, openapi_request)
             try:
                 validated_request.raise_for_errors()
             except InvalidSecurity as ex:
@@ -116,11 +122,9 @@ class Application(Starlette):
 
             # TODO: pass a list of operation IDs to specify which responses not to validate
             if self.validate_responses:
-                ResponseValidator(
-                    self.spec,
-                    custom_formatters=self.custom_formatters,
-                    custom_media_type_deserializers=self.custom_media_type_deserializers,
-                ).validate(openapi_request, response_factory(response)).raise_for_errors()
+                self.response_validator.validate(
+                    self.spec, openapi_request, OpenAPIResponse.from_response(response)
+                ).raise_for_errors()
             return response
 
         for server_path in self._server_paths:
