@@ -44,6 +44,8 @@ blocks:
           commands:
             - 'test-results publish "test-reports/$PY_ENV-junit.xml"'
   - name: Documentation
+    run:
+      when: "branch = 'main' or tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     dependencies:
       - Code checks
     task:
@@ -63,10 +65,14 @@ blocks:
   - name: Publish release
     dependencies: ["Unit tests", "Documentation"]
     run:
-      when: "branch = 'main' and tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
+      when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     task:
       secrets:
         - name: pypi-credentials
+      prologue:
+        commands:
+          - sem-version python 3.8
+          - python -m pip install -U pip poetry
       jobs:
         - name: Build and upload Python package
           commands:
