@@ -178,21 +178,25 @@ def yet_another_endpoint(request):
     ...
 ```
 
-### Additional Server Configuration
+### Custom Formatters and Deserializers
 
 The server instance can be additionally configured with a few OpenAPI-specific custom handlers:
 
-* **custom_formatters** is a dict of custom [formatter](https://github.com/p1c2u/openapi-core#formats) objects that will be applied both to requests and responses.
-* **custom_media_type_deserializers** are [functions](https://github.com/p1c2u/openapi-core#deserializers) that can deserialise custom media types.
+* **custom_formatters** is a dict of custom [formatter](https://openapi-core.readthedocs.io/en/latest/customizations.html#formats) objects that will be applied both to requests and responses.
+* **custom_media_type_deserializers** are [functions](https://openapi-core.readthedocs.io/en/latest/customizations.html#deserializers) that can deserialise custom media types.
+
+The custom formatters and deserializers are applied both to requests and responses. 
 
 Example:
 
 ```python
-app = Application(spec=api_spec)
-api.custom_formatters = {
-    "email": EmailFormatter,
-}
-api.custom_media_type_deserializers = {
-    "application/protobuf": protobuf_deserializer,
-}
+app = Application(
+    spec=api_spec,
+    custom_formatters = {
+        "email": EmailFormatter,
+    },
+    custom_media_type_deserializers = {
+        "application/protobuf": protobuf_deserializer,
+    }
+)
 ```
