@@ -1,8 +1,11 @@
 """PyAPI Server."""
+from __future__ import annotations
+
 from functools import wraps
 from http import HTTPStatus
 from importlib import import_module
 from inspect import iscoroutine
+from logging import getLogger
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Callable, cast, Dict, Optional, Union
@@ -24,6 +27,8 @@ from .validation import (
     OpenAPIRequest,
     OpenAPIResponse,
 )
+
+log = getLogger(__name__)
 
 
 class Application(Starlette):
@@ -75,15 +80,23 @@ class Application(Starlette):
                     endpoint_fn = getattr(base_module, name)
                 except AttributeError as e:
                     raise RuntimeError(
-                        f"The function `{base_module}.{name}` does not exist!"
+                        f"The function `{base_module.__name__}.{name}` does not exist!"
                     ) from e
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
 
-    def set_endpoint(self, endpoint_fn: Callable, *, operation_id: Optional[str] = None):
+    def set_endpoint(
+        self, endpoint_fn: Callable, *, operation_id: Optional[str] = None
+    ) -> None:
         """Sets endpoint function for a given `operationId`.
 
-        If the `operation_id` is not given, it will try to determine it
-        based on the function name.
+        If the `operation_id` is not given, it will try to determine it based on the
+        function name.
+
+        Args:
+            endpoint_fn: A callable (i.e. a function) that handles the endpoint.
+            operation_id: Optional ID of the operation to attach the callable to.
+                          If omitted, the `operation_id` is determined based on
+                          the callable's name.
         """
         if operation_id is None:
             operation_id = endpoint_fn.__name__
@@ -105,8 +118,12 @@ class Application(Starlette):
             try:
                 validated_request.raise_for_errors()
             except InvalidSecurity as ex:
+                if self.debug:
+                    log.exception()
                 raise HTTPException(HTTPStatus.FORBIDDEN, "Invalid security.") from ex
             except OpenAPIError as ex:
+                if self.debug:
+                    log.exception()
                 raise HTTPException(HTTPStatus.BAD_REQUEST, "Bad request") from ex
 
             response = endpoint_fn(request, **kwargs)
@@ -144,9 +161,12 @@ class Application(Starlette):
 
         Otherwise, the `operationId` can be set explicitly:
 
-            @app.endpoint('fooBar'):
+            @app.endpoint("fooBar"):
             def my_endpoint():
                 ...
+
+        Args:
+            operation_id: ID of the operation to attach the callable to.
         """
         if callable(operation_id):
             self.set_endpoint(operation_id)
@@ -160,8 +180,12 @@ class Application(Starlette):
             return decorator
 
     @classmethod
-    def from_file(cls, path: Union[Path, str], *args, **kwargs) -> "Application":
-        """Creates an instance of the class by loading the spec from a local file."""
+    def from_file(cls, path: Union[Path, str], *args, **kwargs) -> Application:
+        """Creates an instance of the class by loading the spec from a local file.
+
+        Args:
+            path: Path of the OpenAPI spec file.
+        """
         spec = get_spec_from_file(path)
         return cls(spec, *args, **kwargs)
 

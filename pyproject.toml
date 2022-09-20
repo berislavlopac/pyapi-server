@@ -70,7 +70,7 @@ convention = "google"
 match-dir = "^(?!tests|examples).*"
 
 [tool.mypy]
-mypy_path = "src/"
+mypy_path = "pyapi/"
 ignore_missing_imports = true
 
 [build-system]
