@@ -119,11 +119,11 @@ class Application(Starlette):
                 validated_request.raise_for_errors()
             except InvalidSecurity as ex:
                 if self.debug:
-                    log.exception()
+                    log.exception("Invalid security")
                 raise HTTPException(HTTPStatus.FORBIDDEN, "Invalid security.") from ex
             except OpenAPIError as ex:
                 if self.debug:
-                    log.exception()
+                    log.exception("Bad request")
                 raise HTTPException(HTTPStatus.BAD_REQUEST, "Bad request") from ex
 
             response = endpoint_fn(request, **kwargs)
