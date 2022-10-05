@@ -40,9 +40,9 @@ class OpenAPIRequest(NamedTuple):
 
         parameters = datatypes.RequestParameters(
             path=request.path_params,
-            query=datatypes.ImmutableMultiDict(request.query_params),
+            query=datatypes.ImmutableMultiDict(request.query_params.items()),
             header=request.headers,
-            cookie=datatypes.ImmutableMultiDict(request.cookies),
+            cookie=datatypes.ImmutableMultiDict(request.cookies.items()),
         )
 
         return cls(
