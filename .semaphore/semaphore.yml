@@ -10,6 +10,8 @@ global_job_config:
       - checkout
 blocks:
   - name: Code checks
+    skip:
+      when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     dependencies: []
     task:
       prologue:
@@ -21,6 +23,8 @@ blocks:
           commands:
             - python -m tox -e checks
   - name: Unit tests
+    skip:
+      when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     dependencies:
       - Code checks
     task:
@@ -43,27 +47,8 @@ blocks:
         on_pass:
           commands:
             - 'test-results publish "test-reports/$PY_ENV-junit.xml"'
-  - name: Documentation
-    run:
-      when: "branch = 'main' or tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
-    dependencies:
-      - Code checks
-    task:
-      prologue:
-        commands:
-          - sem-version python 3.8
-          - python -m pip install -U pip mkdocs
-      jobs:
-        - name: docs
-          commands:
-            - checkout
-            - python -m mkdocs build
-      epilogue:
-        on_pass:
-          commands:
-            - artifact push job site
   - name: Publish release
-    dependencies: ["Unit tests", "Documentation"]
+    dependencies: []
     run:
       when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     task:
