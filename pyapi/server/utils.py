@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, TYPE_CHECKING, Union
 
 import yaml
 from stringcase import camelcase
+
+if TYPE_CHECKING:  # pragma: no cover
+    from . import Spec
 
 
 class OperationSpec:
@@ -33,7 +35,7 @@ class OperationSpec:
         return super().__getattribute__(name)
 
     @classmethod
-    def get_all(cls, spec: Mapping) -> Dict[str, OperationSpec]:
+    def get_all(cls, spec: Spec) -> Dict[str, OperationSpec]:
         """Builds a dict of all operations in the spec."""
         return {
             op_spec["operationId"]: cls(path, method, op_spec)

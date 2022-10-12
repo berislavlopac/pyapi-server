@@ -12,8 +12,16 @@ from typing import Any, Callable, cast, Dict, Optional, Union
 from urllib.parse import urlsplit
 
 from openapi_core import Spec
+from openapi_core.contrib.starlette import StarletteOpenAPIRequest, StarletteOpenAPIResponse
+from openapi_core.deserializing.media_types.factories import MediaTypeDeserializersFactory
 from openapi_core.exceptions import OpenAPIError
+from openapi_core.unmarshalling.schemas.factories import (
+    SchemaUnmarshallersFactory,
+    UnmarshalContext,
+)
 from openapi_core.validation.exceptions import InvalidSecurity
+from openapi_core.validation.request import openapi_request_validator as req_val
+from openapi_core.validation.response import openapi_response_validator as rsp_val
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -21,12 +29,6 @@ from starlette.responses import JSONResponse, Response
 from stringcase import snakecase
 
 from .utils import get_spec_from_file, OperationSpec
-from .validation import (
-    get_request_validator,
-    get_response_validator,
-    OpenAPIRequest,
-    OpenAPIResponse,
-)
 
 log = getLogger(__name__)
 
@@ -51,14 +53,28 @@ class Application(Starlette):
         self.spec: Spec = spec
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
-        self.response_validator = get_response_validator(
-            custom_formatters=custom_formatters or {},
-            custom_media_type_deserializers=custom_media_type_deserializers or {},
-        )
-        self.request_validator = get_request_validator(
-            custom_formatters=custom_formatters or {},
-            custom_media_type_deserializers=custom_media_type_deserializers or {},
-        )
+
+        if custom_formatters:
+            req_val.schema_unmarshallers_factory = SchemaUnmarshallersFactory(  # type: ignore
+                req_val,  # type: ignore
+                custom_formatters=custom_formatters,
+                context=UnmarshalContext.REQUEST,
+            )
+            rsp_val.schema_unmarshallers_factory = SchemaUnmarshallersFactory(  # type: ignore
+                rsp_val,  # type: ignore
+                custom_formatters=custom_formatters,
+                context=UnmarshalContext.RESPONSE,
+            )
+
+        if custom_media_type_deserializers:  # type: ignore
+            deserializers_factory = MediaTypeDeserializersFactory(  # type: ignore
+                custom_deserializers=custom_media_type_deserializers
+            )
+            req_val.media_type_deserializers_factory = deserializers_factory  # type: ignore
+            rsp_val.media_type_deserializers_factory = deserializers_factory  # type: ignore
+
+        self.request_validator = req_val
+        self.response_validator = rsp_val
 
         self._operations = OperationSpec.get_all(self.spec)
         self._server_paths = {urlsplit(server["url"]).path for server in self.spec["servers"]}
@@ -113,7 +129,7 @@ class Application(Starlette):
 
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
-            openapi_request = await OpenAPIRequest.from_request(request)
+            openapi_request = StarletteOpenAPIRequest(request)
             validated_request = self.request_validator.validate(self.spec, openapi_request)
             try:
                 validated_request.raise_for_errors()
@@ -140,7 +156,7 @@ class Application(Starlette):
             # TODO: pass a list of operation IDs to specify which responses not to validate
             if self.validate_responses:
                 self.response_validator.validate(
-                    self.spec, openapi_request, OpenAPIResponse.from_response(response)
+                    self.spec, openapi_request, StarletteOpenAPIResponse(response)
                 ).raise_for_errors()
             return response
 

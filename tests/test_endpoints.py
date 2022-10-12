@@ -5,7 +5,7 @@ import pytest
 from pyapi.server import Application
 
 
-def test_application_adds_endpoints_as_named_module_with_dotted_name(spec_dict):
+def test_endpoints_are_defined_as_named_module_with_dotted_name(spec_dict):
     spec_dict["paths"]["/test"]["get"]["operationId"] = "endpoints.dummyTestEndpoint"
     spec_dict["paths"]["/test"]["post"]["operationId"] = "endpoints.dummyPostEndpoint"
     spec_dict["paths"]["/test/{test_arg}"]["get"][
@@ -19,7 +19,7 @@ def test_application_adds_endpoints_as_named_module_with_dotted_name(spec_dict):
     assert route.path == "/test"
 
 
-def test_application_adds_endpoints_as_imported_module(spec_dict):
+def test_endpoints_are_defined_as_imported_module(spec_dict):
     from tests import endpoints
 
     app = Application(spec_dict, module=endpoints)
@@ -29,7 +29,7 @@ def test_application_adds_endpoints_as_imported_module(spec_dict):
     assert route.path == "/test"
 
 
-def test_application_adds_endpoints_as_imported_module_with_dotted_names(spec_dict):
+def test_endpoints_are_defined_as_imported_module_with_dotted_names(spec_dict):
     import tests
 
     spec_dict["paths"]["/test"]["get"]["operationId"] = "endpoints.dummyTestEndpoint"

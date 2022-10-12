@@ -15,8 +15,9 @@ packages = [
 python = "^3.8"
 PyYAML = "^6.0"
 stringcase = "^1.2.0"
+openapi-core = "^0.16.1"
 starlette = "^0.21.0"
-openapi-core = "^0.15.0"
+asgiref = "^3.5.2"
 uvicorn = {version = "^0.18.3", optional = true}
 
 [tool.poetry.extras]
@@ -53,7 +54,7 @@ omit = [ "*/tests/*", ]
 [tool.coverage.report]
 skip_covered = true
 show_missing = true
-fail_under = 90
+fail_under = 85
 exclude_lines = [ "pragma: no cover", "@abstract",]
 
 [tool.black]
