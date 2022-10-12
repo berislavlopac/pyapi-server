@@ -51,7 +51,7 @@ class OpenAPIRequest(NamedTuple):
             method=request.method.casefold(),
             parameters=parameters,
             body=(await request.body()).decode(),
-            mimetype=request.headers.get("content-type"),
+            mimetype=request.headers.get("content-type", ""),
         )
 
 
