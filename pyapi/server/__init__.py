@@ -83,7 +83,7 @@ class Application(Starlette):
             if isinstance(module, str):
                 module = _load_module(module)
 
-            for operation_id, operation in self._operations.items():
+            for operation_id in self._operations:
                 name = operation_id
                 if "." in name:
                     base, name = name.rsplit(".", 1)
@@ -94,10 +94,10 @@ class Application(Starlette):
                     name = snakecase(name)
                 try:
                     endpoint_fn = getattr(base_module, name)
-                except AttributeError as e:
+                except AttributeError as ex:
                     raise RuntimeError(
                         f"The function `{base_module.__name__}.{name}` does not exist!"
-                    ) from e
+                    ) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
 
     def set_endpoint(
@@ -187,13 +187,12 @@ class Application(Starlette):
         if callable(operation_id):
             self.set_endpoint(operation_id)
             return operation_id
-        else:
 
-            def decorator(fn):
-                self.set_endpoint(fn, operation_id=operation_id)
-                return fn
+        def decorator(endpoint_fn):
+            self.set_endpoint(endpoint_fn, operation_id=operation_id)
+            return endpoint_fn
 
-            return decorator
+        return decorator
 
     @classmethod
     def from_file(cls, path: Union[Path, str], *args, **kwargs) -> Application:
@@ -210,7 +209,7 @@ def _load_module(name: str) -> ModuleType:
     """Helper function to load a module based on its dotted-string name."""
     try:
         module = import_module(name)
-    except ModuleNotFoundError as e:
-        raise RuntimeError(f"The module `{name}` does not exist!") from e
+    except ModuleNotFoundError as ex:
+        raise RuntimeError(f"The module `{name}` does not exist!") from ex
     else:
         return module

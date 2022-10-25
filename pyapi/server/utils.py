@@ -66,5 +66,5 @@ def get_spec_from_file(path: Union[Path, str]) -> dict:
             f" Accepted types: {', '.join(chain(*SpecFileTypes))}"
         )
 
-    with open(path) as spec_file:
+    with open(path, encoding="utf-8") as spec_file:
         return spec_load(spec_file)
