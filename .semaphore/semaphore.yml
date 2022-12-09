@@ -17,7 +17,7 @@ blocks:
       prologue:
         commands:
           - sem-version python 3.8
-          - python -m pip install -U pip poetry tox tox-poetry
+          - python -m pip install -U pip poetry "tox<4.0" tox-poetry
       jobs:
         - name: checks
           commands:
@@ -31,7 +31,7 @@ blocks:
       prologue:
         commands:
           - sem-version python $PY_VERSION
-          - python -m pip install -U pip poetry tox tox-poetry
+          - python -m pip install -U pip poetry "tox<4.0" tox-poetry
       jobs:
         - name: tests
           matrix:

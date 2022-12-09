@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyapi-server"
-version = "0.2.4"
+version = "0.2.5"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 authors = ["Berislav Lopac <berislav@lopac.net>"]
 license = "MIT"
@@ -34,7 +34,7 @@ pytest = ">=7.1.1"
 black = ">=22.1.0"
 pydocstyle = ">=6.1.1"
 mypy = ">=0.942"
-tox = ">=3.24.5"
+tox = "<4.0"
 toml = ">=0.10.2"
 pytest-spec = ">=3.2.0"
 tox-poetry = ">=0.4.1"
