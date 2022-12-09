@@ -41,6 +41,7 @@ class OperationSpec:
             op_spec["operationId"]: cls(path, method, op_spec)
             for path, path_spec in spec["paths"].items()
             for method, op_spec in path_spec.items()
+            if "operationId" in op_spec
         }
 
 

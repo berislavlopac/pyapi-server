@@ -57,18 +57,18 @@
       }
     },
     "/test/{test_arg}": {
+      "parameters": [
+        {
+          "name": "test_arg",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
         "operationId": "dummyTestEndpointWithArgument",
-        "parameters": [
-          {
-            "name": "test_arg",
-            "in": "path",
-            "required": true,
-            "schema": {
-                "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "successful operation",
