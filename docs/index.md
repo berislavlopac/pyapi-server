@@ -37,8 +37,8 @@ The directory `src/examples/server/` contains a working example PyAPI Server app
 
 To run the example, follow these steps inside a Python `virtualenv`:
 
-1. Install [`poetry`](https://poetry.eustace.io/docs/#installation)
-2. Install PyAPI server with optional dependencies: `poetry install -E uvicorn`
+1. Install [`pdm`](https://pdm.fming.dev/latest/#installation)
+2. Install PyAPI server with optional dependencies: `PDM install -G uvicorn`
 3. Start the PyAPI example server: `uvicorn example.server:app --reload --host 0.0.0.0 --port 5000 --log-level debug`
 
 

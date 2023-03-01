@@ -9,7 +9,7 @@ global_job_config:
     commands:
       - sem-version python 3.8
       - checkout
-      - python -m pip install -U pip poetry
+      - python -m pip install -U pip pdm
 blocks:
   - name: Create release
     run:
@@ -20,7 +20,8 @@ blocks:
       jobs:
         - name: Collect package details and create GitHub release
           commands:
-            - RELEASE_VERSION=$(python -m poetry version -s)
+            - python -m pdm config python.use_venv false
+            - RELEASE_VERSION=$(python -m pdm show --version)
             - 'RELEASE_NOTES_FILE="release-notes/${RELEASE_VERSION}.md"'
             - 'if [ ! -f "$RELEASE_NOTES_FILE" ]; then echo "The release notes file \"${RELEASE_NOTES_FILE}\" does not exist."; exit 1; fi'
             - 'if [[ $RELEASE_VERSION =~ \.[0-9]+(a|b|rc)[0-9] ]]; then PRERELEASE="--prerelease"; fi'

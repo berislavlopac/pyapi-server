@@ -1,49 +1,71 @@
-[tool.poetry]
+[project]
 name = "pyapi-server"
-version = "0.2.5"
+version = "0.2.6"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
-authors = ["Berislav Lopac <berislav@lopac.net>"]
-license = "MIT"
 readme = "README.md"
-homepage = "https://pyapi-server.readthedocs.io"
-repository = "https://github.com/berislavlopac/pyapi-server"
-packages = [
-    { include = "pyapi/server/" },
+license = {text = "MIT"}
+authors = [
+    {name = "Berislav Lopac", email = "berislav@lopac.net"},
+]
+requires-python = ">=3.8,<4.0"
+dependencies = [
+    "PyYAML>=6.0",
+    "stringcase>=1.2.0",
+    "openapi-core>=0.16.1",
+    "starlette>=0.21.0",
+    "asgiref>=3.5.2"
 ]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-PyYAML = "^6.0"
-stringcase = "^1.2.0"
-openapi-core = "^0.16.1"
-starlette = "^0.21.0"
-asgiref = "^3.5.2"
-uvicorn = {version = "^0.18.3", optional = true}
+[project.urls]
+homepage = "https://pyapi-server.readthedocs.io"
+documentation = "https://pyapi-server.readthedocs.io"
+repository = "https://github.com/berislavlopac/pyapi-server"
 
-[tool.poetry.extras]
-uvicorn = ["uvicorn"]
+[project.optional-dependencies]
+uvicorn = [
+  "uvicorn>=0.18.3"
+]
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
 
-[tool.poetry.group.dev.dependencies]
-mkdocs = ">=1.2.3"
-pytest-asyncio = ">=0.18.3"
-pytest-cov = ">=3.0.0"
-pytest-flake8 = ">=1.1.1"
-pytest-mypy = ">=0.9.1"
-requests = ">=2.27.1"
-pytest = ">=7.1.1"
-black = ">=22.1.0"
-pydocstyle = ">=6.1.1"
-mypy = ">=0.942"
-tox = "<4.0"
-toml = ">=0.10.2"
-pytest-spec = ">=3.2.0"
-tox-poetry = ">=0.4.1"
-isort = ">=5.10.1"
-pylint = "^2.15.5"
+[tool.pdm.build]
+includes = ["pyapi/server/"]
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = ">=1.3.0"
-mkdocs-material = "^8.5.6"
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest-asyncio>=0.18.3",
+    "pytest-cov>=3.0.0",
+    "pytest-flake8>=1.1.1",
+    "pytest-mypy>=0.9.1",
+    "requests>=2.27.1",
+    "pytest>=7.1.1",
+    "black>=22.1.0",
+    "pydocstyle>=6.1.1",
+    "mypy>=0.942",
+    "toml>=0.10.2",
+    "pytest-spec>=3.2.0",
+    "isort>=5.10.1",
+    "tox>=4.4.6",
+    "tox-pdm>=0.6.1",
+    "ruff>=0.0.253",
+]
+docs = [
+    "mkdocs>=1.3.0",
+    "mkdocs-material>=8.5.6",
+]
+
+[tool.pdm.scripts]
+tests.cmd = "pytest --spec --cov"
+check-lint.shell = """
+    ruff .
+    black --check .
+    isort --check .
+"""
+check-typing.cmd = "mypy --install-types --non-interactive pyapi/"
+check-docs.cmd = "pydocstyle pyapi/"
+checks.composite = ["check-lint", "check-typing", "check-docs"]
+new-commits.shell = "git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -70,9 +92,10 @@ line_length = 96
 filter_files = true
 force_alphabetical_sort_within_sections = true
 
-[tool.pylint.checker]
-disable = "fixme, "
-max-line-length = 96
+[tool.ruff]
+line-length = 96
+target-version = "py38"
+format = "grouped"
 
 [tool.pydocstyle]
 add-ignore = "D104, D107, D212, D401"
@@ -82,7 +105,3 @@ match-dir = "^(?!tests|examples).*"
 [tool.mypy]
 mypy_path = "pyapi/"
 ignore_missing_imports = true
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"

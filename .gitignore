@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -45,12 +46,15 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+*-coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
 .pytest_cache/
-cover/
 test-reports/
+
+# Various testing files
+.mutmut-cache
 
 # Translations
 *.mo
@@ -73,11 +77,11 @@ instance/
 docs/_build/
 
 # PyBuilder
-.pybuilder/
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.ipynb
 
 # IPython
 profile_default/
@@ -88,19 +92,14 @@ ipython_config.py
 #   intended to run in multiple environments; otherwise, check them in:
 .python-version
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-Pipfile
+# lock files
 Pipfile.lock
-
-# poetry
 poetry.lock
+pdm.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# PEP 582; used by e.g. pyflow and PDM
 __pypackages__/
+.pdm.toml
 
 # Celery stuff
 celerybeat-schedule
@@ -139,12 +138,49 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# Cython debug symbols
-cython_debug/
+# ruff linter
+.ruff_cache/
 
-# various
-.mutmut-cache
-.hammett-db
+# PyCharm stuff
+.idea
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
 
-# PyCharm
-.idea/
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Editor workspace files
+.vscode
+
+.testmondata
+
+# macOS
+.DS_Store
+
+# Docker stuff for local dev
+docker-compose.override.yml
+
+.skip-hooks
+
+tmp/
+
+
+# run configurations
+.run/
+/.run/
+
+# kube manifest
+helm/baked_manifest.yaml

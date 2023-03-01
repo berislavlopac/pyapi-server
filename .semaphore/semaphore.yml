@@ -17,7 +17,7 @@ blocks:
       prologue:
         commands:
           - sem-version python 3.8
-          - python -m pip install -U pip poetry "tox<4.0" tox-poetry
+          - python -m pip install -U pip pdm tox tox-pdm
       jobs:
         - name: checks
           commands:
@@ -31,7 +31,7 @@ blocks:
       prologue:
         commands:
           - sem-version python $PY_VERSION
-          - python -m pip install -U pip poetry "tox<4.0" tox-poetry
+          - python -m pip install -U pip pdm tox tox-pdm
       jobs:
         - name: tests
           matrix:
@@ -57,12 +57,12 @@ blocks:
       prologue:
         commands:
           - sem-version python 3.8
-          - python -m pip install -U pip poetry
+          - python -m pip install -U pip pdm
       jobs:
         - name: Build and upload Python package
           commands:
-            - poetry build -f wheel
-            - poetry publish -u b11c -p $PYPI_PASSWORD
+            - pdm build
+            - pdm publish -u b11c -P $PYPI_PASSWORD
 after_pipeline:
   task:
     jobs:
