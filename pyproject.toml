@@ -1,6 +1,6 @@
 [project]
 name = "pyapi-server"
-version = "0.2.6"
+version = "0.2.7"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 readme = "README.md"
 license = {text = "MIT"}
@@ -9,7 +9,7 @@ authors = [
 ]
 requires-python = ">=3.8,<4.0"
 dependencies = [
-    "PyYAML>=6.0",
+    "PyYAML>=5.4",
     "stringcase>=1.2.0",
     "openapi-core>=0.16.1",
     "starlette>=0.21.0",
