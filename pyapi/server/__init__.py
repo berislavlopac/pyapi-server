@@ -12,7 +12,6 @@ from typing import Any, Callable, cast, Dict, Optional, Union
 from urllib.parse import urlsplit
 
 from openapi_core import Spec
-from openapi_core.contrib.starlette import StarletteOpenAPIRequest, StarletteOpenAPIResponse
 from openapi_core.deserializing.media_types.factories import MediaTypeDeserializersFactory
 from openapi_core.exceptions import OpenAPIError
 from openapi_core.unmarshalling.schemas.factories import (
@@ -24,9 +23,15 @@ from openapi_core.validation.request import openapi_request_validator as req_val
 from openapi_core.validation.response import openapi_response_validator as rsp_val
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
 from stringcase import snakecase
+
+from pyapi.server.openapi import (
+    JSONResponse,
+    OpenAPIRequestWrapper,
+    OpenAPIResponseWrapper,
+    Request,
+    Response,
+)
 
 from .utils import get_spec_from_file, OperationSpec
 
@@ -131,7 +136,7 @@ class Application(Starlette):
 
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
-            openapi_request = StarletteOpenAPIRequest(request)
+            openapi_request = OpenAPIRequestWrapper(request)
             validated_request = self.request_validator.validate(
                 spec=self.spec,
                 request=openapi_request,
@@ -156,7 +161,7 @@ class Application(Starlette):
             elif not isinstance(response, Response):
                 raise ValueError(
                     f"The endpoint function `{endpoint_fn.__name__}` must return"
-                    " either a dict or a Starlette Response instance."
+                    " either a dict or a Response instance."
                 )
 
             # TODO: pass a list of operation IDs to specify which responses not to validate
@@ -164,7 +169,7 @@ class Application(Starlette):
                 self.response_validator.validate(
                     spec=self.spec,
                     request=openapi_request,
-                    response=StarletteOpenAPIResponse(response),
+                    response=OpenAPIResponseWrapper(response),
                     base_url=self.spec_base_uri,
                 ).raise_for_errors()
             return response

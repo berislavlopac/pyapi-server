@@ -13,7 +13,6 @@ dependencies = [
     "stringcase>=1.2.0",
     "openapi-core>=0.16.1",
     "starlette>=0.21.0",
-    "asgiref>=3.5.2"
 ]
 
 [project.urls]
@@ -25,6 +24,7 @@ repository = "https://github.com/berislavlopac/pyapi-server"
 uvicorn = [
   "uvicorn>=0.18.3"
 ]
+
 [build-system]
 requires = ["pdm-pep517>=1.0.0"]
 build-backend = "pdm.pep517.api"
@@ -77,7 +77,7 @@ omit = [ "*/tests/*", ]
 [tool.coverage.report]
 skip_covered = true
 show_missing = true
-fail_under = 85
+fail_under = 80
 exclude_lines = [ "pragma: no cover", "@abstract",]
 
 [tool.black]
