@@ -45,12 +45,14 @@ class Application(Starlette):
         enforce_case: bool = True,
         custom_formatters: Optional[Dict[str, Any]] = None,
         custom_media_type_deserializers: Optional[Dict[str, Any]] = None,
+        spec_base_uri: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         if isinstance(spec, dict):
             spec = Spec.from_dict(spec)
         self.spec: Spec = spec
+        self.spec_base_uri = spec_base_uri
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
 
@@ -130,7 +132,11 @@ class Application(Starlette):
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
             openapi_request = StarletteOpenAPIRequest(request)
-            validated_request = self.request_validator.validate(self.spec, openapi_request)
+            validated_request = self.request_validator.validate(
+                spec=self.spec,
+                request=openapi_request,
+                base_url=self.spec_base_uri
+            )
             try:
                 validated_request.raise_for_errors()
             except InvalidSecurity as ex:
@@ -156,7 +162,10 @@ class Application(Starlette):
             # TODO: pass a list of operation IDs to specify which responses not to validate
             if self.validate_responses:
                 self.response_validator.validate(
-                    self.spec, openapi_request, StarletteOpenAPIResponse(response)
+                    spec=self.spec,
+                    request=openapi_request,
+                    response=StarletteOpenAPIResponse(response),
+                    base_url=self.spec_base_uri,
                 ).raise_for_errors()
             return response
 
@@ -201,6 +210,8 @@ class Application(Starlette):
         Args:
             path: Path of the OpenAPI spec file.
         """
+        path = Path(path)
+        kwargs["spec_base_uri"] = f"{path.parent.as_uri()}/"
         spec = get_spec_from_file(path)
         return cls(spec, *args, **kwargs)
 

@@ -52,9 +52,8 @@ class SpecFileTypes(tuple, Enum):
     YAML = ("yaml", "yml")
 
 
-def get_spec_from_file(path: Union[Path, str]) -> dict:
+def get_spec_from_file(path: Path) -> dict:
     """Loads a local file and creates an OpenAPI `Spec` object."""
-    path = Path(path)
     suffix = path.suffix[1:].lower()
 
     if suffix in SpecFileTypes.JSON:
