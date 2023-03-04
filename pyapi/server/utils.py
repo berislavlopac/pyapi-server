@@ -5,7 +5,7 @@ import json
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, TYPE_CHECKING, Union
+from typing import Callable, Dict, TYPE_CHECKING
 
 import yaml
 from stringcase import camelcase

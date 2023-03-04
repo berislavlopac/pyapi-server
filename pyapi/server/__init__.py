@@ -25,14 +25,7 @@ from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from stringcase import snakecase
 
-from pyapi.server.openapi import (
-    JSONResponse,
-    OpenAPIRequestWrapper,
-    OpenAPIResponseWrapper,
-    Request,
-    Response,
-)
-
+from .openapi import JSONResponse, OpenAPIRequest, OpenAPIResponse, Request, Response
 from .utils import get_spec_from_file, OperationSpec
 
 log = getLogger(__name__)
@@ -136,11 +129,9 @@ class Application(Starlette):
 
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
-            openapi_request = OpenAPIRequestWrapper(request)
+            openapi_request = OpenAPIRequest(request)
             validated_request = self.request_validator.validate(
-                spec=self.spec,
-                request=openapi_request,
-                base_url=self.spec_base_uri
+                spec=self.spec, request=openapi_request, base_url=self.spec_base_uri
             )
             try:
                 validated_request.raise_for_errors()
@@ -169,7 +160,7 @@ class Application(Starlette):
                 self.response_validator.validate(
                     spec=self.spec,
                     request=openapi_request,
-                    response=OpenAPIResponseWrapper(response),
+                    response=OpenAPIResponse(response),
                     base_url=self.spec_base_uri,
                 ).raise_for_errors()
             return response

@@ -8,7 +8,9 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response  # noqa: F401
 
 
-class OpenAPIRequestWrapper:
+class OpenAPIRequest:
+    """Wrapper for PyAPI Server requests."""
+
     def __init__(self, request: Request):
         self.request = request
         self._body: Optional[dict] = None
@@ -27,23 +29,28 @@ class OpenAPIRequestWrapper:
         else:
             task = ensure_future(body_coroutine, loop=loop)
             task.add_done_callback(lambda fut: self._set_body(fut.result()))
+
     def _set_body(self, value):
         self._body = value
 
     @property
     def host_url(self) -> str:
+        """Return the request host url."""
         return self.request.base_url._url
 
     @property
     def path(self) -> str:
+        """Return the request path."""
         return self.request.url.path
 
     @property
     def method(self) -> str:
+        """Return the request HTTP method."""
         return self.request.method.lower()
 
     @property
     def body(self) -> Optional[str]:
+        """Return the request body as string, if present."""
         body = self._body
         if isinstance(body, bytes):
             return body.decode("utf-8")
@@ -52,6 +59,7 @@ class OpenAPIRequestWrapper:
 
     @property
     def mimetype(self) -> str:
+        """Return the request content type."""
         content_type = self.request.headers["Content-Type"]
         if content_type:
             return content_type.partition(";")[0]
@@ -59,12 +67,15 @@ class OpenAPIRequestWrapper:
         return ""
 
 
-class OpenAPIResponseWrapper:
+class OpenAPIResponse:
+    """Wrapper for PyAPI Server responses."""
+
     def __init__(self, response: Response):
         self.response = response
 
     @property
     def data(self) -> str:
+        """Return the response content as string."""
         if isinstance(self.response.body, bytes):
             return self.response.body.decode("utf-8")
         assert isinstance(self.response.body, str)
@@ -72,12 +83,15 @@ class OpenAPIResponseWrapper:
 
     @property
     def status_code(self) -> int:
+        """Return the response HTTP status code."""
         return self.response.status_code
 
     @property
     def mimetype(self) -> str:
+        """Return the response content type."""
         return self.response.media_type or ""
 
     @property
     def headers(self) -> Headers:
+        """Return the response headers."""
         return self.response.headers
