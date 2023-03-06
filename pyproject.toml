@@ -58,7 +58,7 @@ docs = [
 [tool.pdm.scripts]
 tests.cmd = "pytest --spec --cov"
 check-lint.shell = """
-    ruff .
+    ruff pyapi/
     black --check .
     isort --check .
 """
@@ -93,6 +93,8 @@ filter_files = true
 force_alphabetical_sort_within_sections = true
 
 [tool.ruff]
+select = ["E", "F", "W", "D", "PL", "ERA", "N"]
+ignore = ["D104", "D107", "D203", "D212", "D401", "D407"]
 line-length = 96
 target-version = "py38"
 format = "grouped"

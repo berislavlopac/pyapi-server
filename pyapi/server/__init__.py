@@ -103,7 +103,8 @@ class Application(Starlette):
     def set_endpoint(
         self, endpoint_fn: Callable, *, operation_id: Optional[str] = None
     ) -> None:
-        """Sets endpoint function for a given `operationId`.
+        """
+        Sets endpoint function for a given `operationId`.
 
         If the `operation_id` is not given, it will try to determine it based on the
         function name.
@@ -171,7 +172,8 @@ class Application(Starlette):
             )
 
     def endpoint(self, operation_id: Union[Callable, str]):
-        """Decorator for setting endpoints.
+        """
+        Decorator for setting endpoints.
 
         If used without arguments, it will try to determine the `operationId` based on the
         decorated function name:
@@ -201,9 +203,12 @@ class Application(Starlette):
 
     @classmethod
     def from_file(cls, path: Union[Path, str], *args, **kwargs) -> Application:
-        """Creates an instance of the class by loading the spec from a local file.
+        """
+        Creates an instance of the class by loading the spec from a local file.
 
         Args:
+            args: Positional arguments are passed on to the class constructor.
+            kwargs: Keyword arguments are passed on to the class constructor.
             path: Path of the OpenAPI spec file.
         """
         path = Path(path)
