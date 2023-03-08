@@ -1,10 +1,10 @@
 """OpenAPI request and response wrappers; adapted from openapi-core."""
-from asyncio import ensure_future, get_running_loop, run
+from asyncio import create_task, get_running_loop, run
 from typing import Optional
 
 from openapi_core.validation.request.datatypes import RequestParameters
 from starlette.datastructures import Headers
-from starlette.requests import Request
+from starlette.requests import ClientDisconnect, Request
 from starlette.responses import JSONResponse, Response  # noqa: F401
 
 
@@ -23,15 +23,18 @@ class OpenAPIRequest:
 
         body_coroutine = self.request.json()
         try:
-            loop = get_running_loop()
+            get_running_loop()
         except RuntimeError:
             self._body = run(body_coroutine)
         else:
-            task = ensure_future(body_coroutine, loop=loop)
-            task.add_done_callback(lambda fut: self._set_body(fut.result()))
+            task = create_task(body_coroutine)
+            task.add_done_callback(self._set_body_callback)
 
-    def _set_body(self, value):
-        self._body = value
+    def _set_body_callback(self, task):
+        try:
+            self._body = task.result()
+        except ClientDisconnect:
+            pass
 
     @property
     def host_url(self) -> str:
