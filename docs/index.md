@@ -181,7 +181,7 @@ def yet_another_endpoint(request):
     ...
 ```
 
-### Custom Format Validators
+## Custom Format Validators
 
 If the OpenAPI spec contains custom string formats, the server can be configured to recognize them via the `custom_format_validators` keyword argument. This argument is a mapping, where the keys are format names, while the values are [callables](https://openapi-core.readthedocs.io/en/latest/customizations.html#format-validators) which take a string and return `True` or `False`, depending on whether the string is in valid format.
 
