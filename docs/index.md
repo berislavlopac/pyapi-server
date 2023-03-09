@@ -181,25 +181,15 @@ def yet_another_endpoint(request):
     ...
 ```
 
-### Custom Formatters and Deserializers
+### Custom Format Validators
 
-The server instance can be additionally configured with a few OpenAPI-specific custom handlers:
+If the OpenAPI spec contains custom string formats, the server can be configured to recognize them via the `custom_format_validators` keyword argument. This argument is a mapping, where the keys are format names, while the values are [callables](https://openapi-core.readthedocs.io/en/latest/customizations.html#format-validators) which take a string and return `True` or `False`, depending on whether the string is in valid format.
 
-* **custom_formatters** is a dict of custom [formatter](https://openapi-core.readthedocs.io/en/latest/customizations.html#formats) objects that will be applied both to requests and responses.
-* **custom_media_type_deserializers** are [functions](https://openapi-core.readthedocs.io/en/latest/customizations.html#deserializers) that can deserialise custom media types.
-
-The custom formatters and deserializers are applied both to requests and responses. 
-
-Example:
+For example:
 
 ```python
 app = Application(
     spec=api_spec,
-    custom_formatters = {
-        "email": EmailFormatter,
-    },
-    custom_media_type_deserializers = {
-        "application/protobuf": protobuf_deserializer,
-    }
+    custom_format_validators = {"email": validate_email}
 )
 ```

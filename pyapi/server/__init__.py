@@ -8,19 +8,20 @@ from inspect import iscoroutine
 from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, cast, Dict, Optional, Union
+from typing import Callable, cast, Dict, Optional, Union
 from urllib.parse import urlsplit
 
-from openapi_core import Spec
-from openapi_core.deserializing.media_types.factories import MediaTypeDeserializersFactory
-from openapi_core.exceptions import OpenAPIError
-from openapi_core.unmarshalling.schemas.factories import (
-    SchemaUnmarshallersFactory,
-    UnmarshalContext,
+from openapi_core import (
+    Spec,
+    V30RequestValidator,
+    V30ResponseValidator,
+    V31RequestValidator,
+    V31ResponseValidator,
+    validate_request,
+    validate_response,
 )
-from openapi_core.validation.exceptions import InvalidSecurity
-from openapi_core.validation.request import openapi_request_validator as req_val
-from openapi_core.validation.response import openapi_response_validator as rsp_val
+from openapi_core.exceptions import OpenAPIError
+from openapi_core.security.exceptions import SecurityProviderError
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from stringcase import snakecase
@@ -41,8 +42,7 @@ class Application(Starlette):
         module: Optional[Union[str, ModuleType]] = None,
         validate_responses: bool = True,
         enforce_case: bool = True,
-        custom_formatters: Optional[Dict[str, Any]] = None,
-        custom_media_type_deserializers: Optional[Dict[str, Any]] = None,
+        custom_format_validators: Optional[Dict[str, Callable]] = None,
         spec_base_uri: Optional[str] = None,
         **kwargs,
     ):
@@ -53,28 +53,11 @@ class Application(Starlette):
         self.spec_base_uri = spec_base_uri
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
+        self.custom_format_validators = custom_format_validators
 
-        if custom_formatters:
-            req_val.schema_unmarshallers_factory = SchemaUnmarshallersFactory(  # type: ignore
-                req_val,  # type: ignore
-                custom_formatters=custom_formatters,
-                context=UnmarshalContext.REQUEST,
-            )
-            rsp_val.schema_unmarshallers_factory = SchemaUnmarshallersFactory(  # type: ignore
-                rsp_val,  # type: ignore
-                custom_formatters=custom_formatters,
-                context=UnmarshalContext.RESPONSE,
-            )
-
-        if custom_media_type_deserializers:  # type: ignore
-            deserializers_factory = MediaTypeDeserializersFactory(  # type: ignore
-                custom_deserializers=custom_media_type_deserializers
-            )
-            req_val.media_type_deserializers_factory = deserializers_factory  # type: ignore
-            rsp_val.media_type_deserializers_factory = deserializers_factory  # type: ignore
-
-        self.request_validator = req_val
-        self.response_validator = rsp_val
+        is_v31 = self.spec_version.startswith("3.1")
+        self.request_validator = V31RequestValidator if is_v31 else V30RequestValidator
+        self.response_validator = V31ResponseValidator if is_v31 else V30ResponseValidator
 
         self._operations = OperationSpec.get_all(self.spec)
         self._server_paths = {urlsplit(server["url"]).path for server in self.spec["servers"]}
@@ -99,6 +82,11 @@ class Application(Starlette):
                         f"The function `{base_module.__name__}.{name}` does not exist!"
                     ) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
+
+    @property
+    def spec_version(self) -> str:
+        """Returns the OpenAPI spec's version."""
+        return self.spec["info"]["version"]
 
     def set_endpoint(
         self, endpoint_fn: Callable, *, operation_id: Optional[str] = None
@@ -131,12 +119,14 @@ class Application(Starlette):
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
             openapi_request = OpenAPIRequest(request)
-            validated_request = self.request_validator.validate(
-                spec=self.spec, request=openapi_request, base_url=self.spec_base_uri
-            )
             try:
-                validated_request.raise_for_errors()
-            except InvalidSecurity as ex:
+                validate_request(
+                    request=openapi_request,
+                    spec=self.spec,
+                    cls=self.request_validator,
+                    extra_format_validators=self.custom_format_validators,
+                )
+            except SecurityProviderError as ex:
                 if self.debug:
                     log.exception("Invalid security")
                 raise HTTPException(HTTPStatus.FORBIDDEN, "Invalid security.") from ex
@@ -158,12 +148,14 @@ class Application(Starlette):
 
             # TODO: pass a list of operation IDs to specify which responses not to validate
             if self.validate_responses:
-                self.response_validator.validate(
-                    spec=self.spec,
+                validate_response(
                     request=openapi_request,
                     response=OpenAPIResponse(response),
+                    spec=self.spec,
                     base_url=self.spec_base_uri,
-                ).raise_for_errors()
+                    extra_format_validators=self.custom_format_validators,
+                    cls=self.response_validator,
+                )
             return response
 
         for server_path in self._server_paths:

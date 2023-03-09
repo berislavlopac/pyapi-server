@@ -2,13 +2,14 @@
 from asyncio import create_task, get_running_loop, run
 from typing import Optional
 
+from openapi_core import protocols
 from openapi_core.validation.request.datatypes import RequestParameters
 from starlette.datastructures import Headers
 from starlette.requests import ClientDisconnect, Request
 from starlette.responses import JSONResponse, Response  # noqa: F401
 
 
-class OpenAPIRequest:
+class OpenAPIRequest(protocols.Request):
     """Wrapper for PyAPI Server requests."""
 
     def __init__(self, request: Request):
@@ -63,14 +64,14 @@ class OpenAPIRequest:
     @property
     def mimetype(self) -> str:
         """Return the request content type."""
-        content_type = self.request.headers["Content-Type"]
+        content_type = self.request.headers.get("Content-Type")
         if content_type:
             return content_type.partition(";")[0]
 
         return ""
 
 
-class OpenAPIResponse:
+class OpenAPIResponse(protocols.Response):
     """Wrapper for PyAPI Server responses."""
 
     def __init__(self, response: Response):
