@@ -40,24 +40,21 @@ class Application(Starlette):
         spec: Union[Spec, dict],
         *,
         module: Optional[Union[str, ModuleType]] = None,
+        validate_schema: bool = True,
         validate_responses: bool = True,
         enforce_case: bool = True,
         custom_format_validators: Optional[Dict[str, Callable]] = None,
-        spec_base_uri: Optional[str] = None,
+        spec_url: Optional[str] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
         if isinstance(spec, dict):
-            spec = Spec.from_dict(spec)
+            extra_kwargs = {} if validate_schema else {"validator": None}
+            spec = Spec.from_dict(spec, spec_url=spec_url, **extra_kwargs)
         self.spec: Spec = spec
-        self.spec_base_uri = spec_base_uri
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
         self.custom_format_validators = custom_format_validators
-
-        is_v31 = self.spec_version.startswith("3.1")
-        self.request_validator = V31RequestValidator if is_v31 else V30RequestValidator
-        self.response_validator = V31ResponseValidator if is_v31 else V30ResponseValidator
 
         self._operations = OperationSpec.get_all(self.spec)
         self._server_paths = {urlsplit(server["url"]).path for server in self.spec["servers"]}
@@ -82,11 +79,6 @@ class Application(Starlette):
                         f"The function `{base_module.__name__}.{name}` does not exist!"
                     ) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
-
-    @property
-    def spec_version(self) -> str:
-        """Returns the OpenAPI spec's version."""
-        return self.spec["info"]["version"]
 
     def set_endpoint(
         self, endpoint_fn: Callable, *, operation_id: Optional[str] = None
@@ -123,7 +115,6 @@ class Application(Starlette):
                 validate_request(
                     request=openapi_request,
                     spec=self.spec,
-                    cls=self.request_validator,
                     extra_format_validators=self.custom_format_validators,
                 )
             except SecurityProviderError as ex:
@@ -152,9 +143,7 @@ class Application(Starlette):
                     request=openapi_request,
                     response=OpenAPIResponse(response),
                     spec=self.spec,
-                    base_url=self.spec_base_uri,
                     extra_format_validators=self.custom_format_validators,
-                    cls=self.response_validator,
                 )
             return response
 
@@ -199,14 +188,12 @@ class Application(Starlette):
         Creates an instance of the class by loading the spec from a local file.
 
         Args:
+            path: Path of the OpenAPI spec file.
             args: Positional arguments are passed on to the class constructor.
             kwargs: Keyword arguments are passed on to the class constructor.
-            path: Path of the OpenAPI spec file.
         """
         path = Path(path)
-        kwargs["spec_base_uri"] = f"{path.parent.as_uri()}/"
-        spec = get_spec_from_file(path)
-        return cls(spec, *args, **kwargs)
+        return cls(get_spec_from_file(path), *args, spec_url=f"{path.as_uri()}/", **kwargs)
 
 
 def _load_module(name: str) -> ModuleType:
