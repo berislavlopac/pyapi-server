@@ -1,6 +1,6 @@
 [project]
 name = "pyapi-server"
-version = "0.3.0"
+version = "0.3.1"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 readme = "README.md"
 license = {text = "MIT"}
