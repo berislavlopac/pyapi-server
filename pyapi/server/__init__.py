@@ -42,7 +42,7 @@ class Application(Starlette):
         super().__init__(**kwargs)
         if isinstance(spec, dict):
             extra_kwargs: dict[str, Any] = {}
-            if validate_schema:
+            if not validate_schema:
                 extra_kwargs["validator"] = None
             spec = Spec.from_dict(spec, spec_url=spec_url, **extra_kwargs)
         self.spec: Spec = spec
