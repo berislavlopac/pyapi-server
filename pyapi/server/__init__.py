@@ -187,7 +187,7 @@ class Application(Starlette):
             kwargs: Keyword arguments are passed on to the class constructor.
         """
         path = Path(path)
-        return cls(get_spec_from_file(path), *args, spec_url=f"{path.as_uri()}/", **kwargs)
+        return cls(get_spec_from_file(path), *args, spec_url=path.as_uri(), **kwargs)
 
 
 def _load_module(name: str) -> ModuleType:
