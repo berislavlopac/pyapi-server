@@ -1,12 +1,15 @@
 """OpenAPI request and response wrappers; adapted from openapi-core."""
-from asyncio import create_task, get_running_loop, run
-from typing import Optional
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, Union
 
 from openapi_core import protocols
 from openapi_core.validation.request.datatypes import RequestParameters
 from starlette.datastructures import Headers
-from starlette.requests import ClientDisconnect, Request
+from starlette.requests import Request
 from starlette.responses import JSONResponse, Response  # noqa: F401
+
+pool = ThreadPoolExecutor()
 
 
 class OpenAPIRequest(protocols.Request):
@@ -14,28 +17,18 @@ class OpenAPIRequest(protocols.Request):
 
     def __init__(self, request: Request):
         self.request = request
-        self._body: Optional[dict] = None
+        self._body: Optional[Union[str, bytes]] = None
         self.parameters = RequestParameters(
             query=self.request.query_params,
             header=self.request.headers,
             cookie=self.request.cookies,
             path=self.request.path_params,
         )
+        self._body_task = None
 
-        body_coroutine = self.request.json()
-        try:
-            get_running_loop()
-        except RuntimeError:
-            self._body = run(body_coroutine)
-        else:
-            task = create_task(body_coroutine)
-            task.add_done_callback(self._set_body_callback)
-
-    def _set_body_callback(self, task):
-        try:
-            self._body = task.result()
-        except ClientDisconnect:
-            pass
+        body_coroutine = self.request.body()
+        # run in a separate thread to ensure it works even inside an event loop
+        self._body = pool.submit(asyncio.run, body_coroutine).result()  # type: ignore
 
     @property
     def host_url(self) -> str:
@@ -58,7 +51,6 @@ class OpenAPIRequest(protocols.Request):
         body = self._body
         if isinstance(body, bytes):
             return body.decode("utf-8")
-        assert body is None or isinstance(body, str)
         return body
 
     @property
@@ -82,7 +74,6 @@ class OpenAPIResponse(protocols.Response):
         """Return the response content as string."""
         if isinstance(self.response.body, bytes):
             return self.response.body.decode("utf-8")
-        assert isinstance(self.response.body, str)
         return self.response.body
 
     @property

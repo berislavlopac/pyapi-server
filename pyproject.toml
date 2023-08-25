@@ -1,6 +1,6 @@
 [project]
 name = "pyapi-server"
-version = "0.3.3"
+version = "0.3.4"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 readme = "README.md"
 license = {text = "MIT"}
@@ -75,7 +75,7 @@ source = [ "pyapi/", ]
 omit = [ "*/tests/*", ]
 
 [tool.coverage.report]
-skip_covered = true
+skip_covered = false
 show_missing = true
 fail_under = 80
 exclude_lines = [ "pragma: no cover", "@abstract",]
@@ -94,7 +94,7 @@ force_alphabetical_sort_within_sections = true
 
 [tool.ruff]
 select = ["E", "F", "W", "D", "PL", "ERA", "N"]
-ignore = ["D104", "D107", "D203", "D212", "D401", "D407"]
+ignore = ["D104", "D107", "D203", "D212", "D401", "D407", "PLR0913"]
 line-length = 96
 target-version = "py38"
 format = "grouped"
