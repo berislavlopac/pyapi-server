@@ -54,7 +54,7 @@ blocks:
       when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     task:
       secrets:
-        - name: pypi-credentials
+        - name: pyapi-server
       prologue:
         commands:
           - sem-version python 3.8
@@ -63,7 +63,7 @@ blocks:
         - name: Build and upload Python package
           commands:
             - pdm build
-            - pdm publish -u b11c -P $PYPI_PASSWORD
+            - pdm publish -u __token__ -P $PYPI_PASSWORD
 after_pipeline:
   task:
     jobs:
