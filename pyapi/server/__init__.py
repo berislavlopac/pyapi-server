@@ -18,8 +18,8 @@ from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from stringcase import snakecase
 
-from .openapi import JSONResponse, OpenAPIRequest, OpenAPIResponse, Request, Response
-from .utils import get_spec_from_file, OperationSpec
+from .spec import get_spec_from_file, OperationSpec
+from .validation import JSONResponse, OpenAPIRequest, OpenAPIResponse, Request, Response
 
 log = getLogger(__name__)
 

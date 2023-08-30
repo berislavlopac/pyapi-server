@@ -9,8 +9,6 @@ from starlette.datastructures import Headers
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response  # noqa: F401
 
-pool = ThreadPoolExecutor()
-
 
 class OpenAPIRequest(protocols.Request):
     """Wrapper for PyAPI Server requests."""
@@ -27,8 +25,13 @@ class OpenAPIRequest(protocols.Request):
         self._body_task = None
 
         body_coroutine = self.request.body()
-        # run in a separate thread to ensure it works even inside an event loop
-        self._body = pool.submit(asyncio.run, body_coroutine).result()  # type: ignore
+        if asyncio.get_event_loop().is_running():
+            # if there is an active event loop, run in separate thread
+            pool = ThreadPoolExecutor()
+            self._body = pool.submit(asyncio.run, body_coroutine).result()  # type: ignore
+        else:
+            # in a fully sync environment, run in a new loop
+            self._body = asyncio.run(body_coroutine)
 
     @property
     def host_url(self) -> str:
@@ -48,10 +51,9 @@ class OpenAPIRequest(protocols.Request):
     @property
     def body(self) -> Optional[str]:
         """Return the request body as string, if present."""
-        body = self._body
-        if isinstance(body, bytes):
-            return body.decode("utf-8")
-        return body
+        if isinstance(self._body, bytes):
+            return self._body.decode("utf-8")
+        return self._body
 
     @property
     def mimetype(self) -> str:
