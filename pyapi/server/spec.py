@@ -31,18 +31,6 @@ class OperationSpec:
                 self.parameters[param.pop("in")][param.pop("name")] = param
             self.parameters = dict(self.parameters)
 
-    def __getattr__(self, name):
-        """
-        Looks for values of the specification fields.
-
-        If the exact match of a name fails, also checks for the camel case version.
-        """
-        if name in self.spec:
-            return self.spec[name]
-        if (camelcase_name := camelcase(name)) in self.spec:
-            return self.spec[camelcase_name]
-        return super().__getattribute__(name)
-
     @classmethod
     def get_all(cls, spec: Spec) -> Dict[str, OperationSpec]:
         """Builds a dict of all operations in the spec."""
