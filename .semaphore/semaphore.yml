@@ -54,7 +54,7 @@ blocks:
       when: "tag =~ '^([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?$'"
     task:
       secrets:
-        - name: pyapi-credentials
+        - name: pypi-credentials
       prologue:
         commands:
           - sem-version python 3.8
