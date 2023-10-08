@@ -82,7 +82,7 @@ exclude_lines = [ "pragma: no cover", "@abstract",]
 
 [tool.black]
 line-length = 96
-target-version = ['py38', 'py39', 'py310']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
 verbose = false
 skip-string-normalization = false
 
@@ -97,7 +97,7 @@ select = ["E", "F", "W", "D", "PL", "ERA", "N"]
 ignore = ["D104", "D107", "D203", "D212", "D401", "D407", "PLR0913"]
 line-length = 96
 target-version = "py38"
-format = "grouped"
+output-format = "grouped"
 
 [tool.pydocstyle]
 add-ignore = "D104, D107, D212, D401"

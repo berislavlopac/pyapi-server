@@ -1,5 +1,5 @@
 version: v1.0
-name: Publish release
+name: Create release
 agent:
   machine:
     type: e1-standard-2
