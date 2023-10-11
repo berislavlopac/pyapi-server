@@ -28,7 +28,7 @@ class OperationSpec:
         if isinstance(parameters, Sequence):
             self.parameters = defaultdict(dict)
             for param in parameters:
-                self.parameters[param.pop("in")][param.pop("name")] = param
+                self.parameters[param["in"]][param["name"]] = param
             self.parameters = dict(self.parameters)
 
     def __getattr__(self, name):
