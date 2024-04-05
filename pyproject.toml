@@ -11,8 +11,9 @@ requires-python = ">=3.8,<4.0"
 dependencies = [
     "PyYAML>=5.4",
     "stringcase>=1.2.0",
-    "openapi-core>=0.16.1",
+    "openapi-core>=0.18",
     "starlette>=0.21.0",
+    "jsonschema-path>=0.3.2",
 ]
 
 [project.urls]
@@ -26,8 +27,8 @@ uvicorn = [
 ]
 
 [build-system]
-requires = ["pdm-pep517>=1.0.0"]
-build-backend = "pdm.pep517.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.pdm.build]
 includes = ["pyapi/server/"]
@@ -40,7 +41,6 @@ dev = [
     "pytest-mypy>=0.9.1",
     "requests>=2.27.1",
     "pytest>=7.1.1",
-    "black>=22.1.0",
     "pydocstyle>=6.1.1",
     "mypy>=0.942",
     "toml>=0.10.2",
@@ -58,13 +58,16 @@ docs = [
 [tool.pdm.scripts]
 tests.cmd = "pytest --spec --cov"
 check-lint.shell = """
-    ruff pyapi/
-    black --check .
+    ruff check .
+    ruff format --check .
     isort --check .
 """
-check-typing.cmd = "mypy --install-types --non-interactive pyapi/"
-check-docs.cmd = "pydocstyle pyapi/"
-checks.composite = ["check-lint", "check-typing", "check-docs"]
+reformat.shell = """
+    isort .
+    ruff format .
+"""
+check-typing.cmd = "mypy --install-types --non-interactive"
+checks.composite = ["check-lint", "check-typing"]
 new-commits.shell = "git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate"
 
 [tool.pytest.ini_options]
@@ -80,12 +83,6 @@ show_missing = true
 fail_under = 80
 exclude_lines = [ "pragma: no cover", "@abstract",]
 
-[tool.black]
-line-length = 96
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
-verbose = false
-skip-string-normalization = false
-
 [tool.isort]
 profile = "black"
 line_length = 96
@@ -93,17 +90,38 @@ filter_files = true
 force_alphabetical_sort_within_sections = true
 
 [tool.ruff]
-select = ["E", "F", "W", "D", "PL", "ERA", "N"]
-ignore = ["D104", "D107", "D203", "D212", "D401", "D407", "PLR0913"]
 line-length = 96
-target-version = "py38"
+target-version = "py311"
 output-format = "grouped"
 
-[tool.pydocstyle]
-add-ignore = "D104, D107, D212, D401"
-convention = "google"
-match-dir = "^(?!tests|examples).*"
+[tool.ruff.lint]
+select = [  # see https://docs.astral.sh/ruff/rules/
+    "E4", "E7", "E9",  # basic pycodestyle rules
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes rules
+    "D",     # pydocstyle checks
+#    "N",     # PEP8 naming conventions
+#    "PLR",   # Pylint refactoring recommendations
+#    "PTH",   # recommends to use pathlib instead of os.path
+#    "UP",    # pyupgrade suggestions
+#    "BLE",   # locates blind exception capture
+#    "B",     # locates possible bugs and design problems
+#    "A",     # locates shadowing of builtin names
+#    "C4",    # locates possible issues with comprehensions
+#    "DTZ",   # locates incorrect use of timezone information
+#    "PIE",   # miscellaneous linting rules
+#    "TRY",   # locates potential exception handling antipatterns
+#    "PERF",  # locates potential performance issues
+#    "RUF",   # various Ruff-specific linting rules
+]
+ignore = ["D104", "D107", "D203", "D212", "D401", "D407", "D413"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D"]
+"example/*" = ["D"]
 
 [tool.mypy]
 mypy_path = "pyapi/"
+files = ["pyapi/"]
 ignore_missing_imports = true

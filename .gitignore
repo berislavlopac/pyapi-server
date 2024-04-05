@@ -121,6 +121,10 @@ venv.bak/
 .spyderproject
 .spyproject
 
+# Documentation editors
+.obsidian/
+Writerside/
+
 # Rope project settings
 .ropeproject
 

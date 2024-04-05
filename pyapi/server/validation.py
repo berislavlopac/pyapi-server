@@ -1,4 +1,5 @@
 """OpenAPI request and response wrappers; adapted from openapi-core."""
+
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Union
@@ -49,10 +50,10 @@ class OpenAPIRequest(protocols.Request):
         return self.request.method.lower()
 
     @property
-    def body(self) -> Optional[str]:
+    def body(self) -> Optional[bytes]:
         """Return the request body as string, if present."""
-        if isinstance(self._body, bytes):
-            return self._body.decode("utf-8")
+        if isinstance(self._body, str):
+            return self._body.encode("utf-8")
         return self._body
 
     @property
@@ -64,6 +65,11 @@ class OpenAPIRequest(protocols.Request):
 
         return ""
 
+    @property
+    def content_type(self) -> str:
+        """Return the request content type."""
+        return self.mimetype
+
 
 class OpenAPIResponse(protocols.Response):
     """Wrapper for PyAPI Server responses."""
@@ -72,10 +78,10 @@ class OpenAPIResponse(protocols.Response):
         self.response = response
 
     @property
-    def data(self) -> str:
+    def data(self) -> bytes:
         """Return the response content as string."""
-        if isinstance(self.response.body, bytes):
-            return self.response.body.decode("utf-8")
+        if isinstance(self.response.body, str):
+            return self.response.body.encode("utf-8")
         return self.response.body
 
     @property
@@ -92,3 +98,8 @@ class OpenAPIResponse(protocols.Response):
     def headers(self) -> Headers:
         """Return the response headers."""
         return self.response.headers
+
+    @property
+    def content_type(self) -> str:
+        """Return the response content type."""
+        return self.mimetype

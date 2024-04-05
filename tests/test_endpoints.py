@@ -8,9 +8,9 @@ from pyapi.server import Application
 def test_endpoints_are_defined_as_named_module_with_dotted_name(spec_dict):
     spec_dict["paths"]["/test"]["get"]["operationId"] = "endpoints.dummyTestEndpoint"
     spec_dict["paths"]["/test"]["post"]["operationId"] = "endpoints.dummyPostEndpoint"
-    spec_dict["paths"]["/test/{test_arg}"]["get"][
-        "operationId"
-    ] = "endpoints.dummyTestEndpointWithArgument"
+    spec_dict["paths"]["/test/{test_arg}"]["get"]["operationId"] = (
+        "endpoints.dummyTestEndpointWithArgument"
+    )
     spec_dict["paths"]["/test-async"]["get"]["operationId"] = "endpoints.dummyTestEndpointCoro"
     app = Application(spec_dict, module="tests")
     route = app.routes[0]
@@ -34,9 +34,9 @@ def test_endpoints_are_defined_as_imported_module_with_dotted_names(spec_dict):
 
     spec_dict["paths"]["/test"]["get"]["operationId"] = "endpoints.dummyTestEndpoint"
     spec_dict["paths"]["/test"]["post"]["operationId"] = "endpoints.dummyPostEndpoint"
-    spec_dict["paths"]["/test/{test_arg}"]["get"][
-        "operationId"
-    ] = "endpoints.dummyTestEndpointWithArgument"
+    spec_dict["paths"]["/test/{test_arg}"]["get"]["operationId"] = (
+        "endpoints.dummyTestEndpointWithArgument"
+    )
     spec_dict["paths"]["/test-async"]["get"]["operationId"] = "endpoints.dummyTestEndpointCoro"
     app = Application(spec_dict, module=tests)
     route = app.routes[0]

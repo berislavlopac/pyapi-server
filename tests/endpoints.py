@@ -22,5 +22,4 @@ async def dummy_post_endpoint(request):
     return Response(status_code=HTTPStatus.NO_CONTENT.value)
 
 
-async def endpoint_returning_nothing(request):
-    ...
+async def endpoint_returning_nothing(request): ...

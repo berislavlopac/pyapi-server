@@ -162,8 +162,7 @@ app.set_endpoint(another_endpoint, operation_id="someOtherOperationId")
 
 #### The Endpoint Decorator
 
-It is also possible to define endpoints as they are defines, using the `endpoint` decorator, which works analogous
-to the `set_endpoint` method:
+It is also possible to specify endpoints as they are defined, using the `@endpoint` decorator, which works analogous to the `set_endpoint` method:
 
 ```python
 app = Application(spec=api_spec)

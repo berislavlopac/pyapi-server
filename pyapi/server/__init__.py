@@ -1,4 +1,5 @@
 """PyAPI Server."""
+
 from __future__ import annotations
 
 from functools import wraps
@@ -11,7 +12,8 @@ from types import ModuleType
 from typing import Any, Callable, cast, Mapping, Optional, Union
 from urllib.parse import urlsplit
 
-from openapi_core import Spec, validate_request, validate_response
+from jsonschema_path import SchemaPath
+from openapi_core import validate_request, validate_response
 from openapi_core.exceptions import OpenAPIError
 from openapi_core.security.exceptions import SecurityProviderError
 from starlette.applications import Starlette
@@ -29,10 +31,9 @@ class Application(Starlette):
 
     def __init__(
         self,
-        spec: Union[Spec, dict],
+        spec: Union[SchemaPath, dict],
         *,
         module: Optional[Union[str, ModuleType]] = None,
-        validate_schema: bool = True,
         validate_responses: bool = True,
         enforce_case: bool = True,
         custom_format_validators: Optional[Mapping[str, Callable]] = None,
@@ -41,11 +42,8 @@ class Application(Starlette):
     ):
         super().__init__(**kwargs)
         if isinstance(spec, dict):
-            extra_kwargs: dict[str, Any] = {}
-            if not validate_schema:
-                extra_kwargs["validator"] = None
-            spec = Spec.from_dict(spec, spec_url=spec_url, **extra_kwargs)
-        self.spec: Spec = spec
+            spec = SchemaPath.from_dict(spec, base_uri=spec_url)
+        self.spec: SchemaPath = spec
         self.validate_responses = validate_responses
         self.enforce_case = enforce_case
         self.custom_format_validators = custom_format_validators
