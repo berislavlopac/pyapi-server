@@ -96,6 +96,7 @@ ipython_config.py
 Pipfile.lock
 poetry.lock
 pdm.lock
+.pdm-python
 
 # PEP 582; used by e.g. pyflow and PDM
 __pypackages__/
