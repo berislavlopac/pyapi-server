@@ -143,7 +143,7 @@ select = [  # see https://docs.astral.sh/ruff/rules/
     "PERF",  # locates potential performance issues
     "RUF",   # various Ruff-specific linting rules
 ]
-ignore = ["D104", "D107", "D203", "D212", "D401", "D407", "D413"]
+ignore = ["D107", "D203", "D211", "D212", "D401", "D407", "D413"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
