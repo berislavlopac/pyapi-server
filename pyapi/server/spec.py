@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from collections.abc import Callable, Mapping, Sequence
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, Mapping, Sequence
 
 import yaml
 from humps import camelize
@@ -43,7 +43,7 @@ class OperationSpec:
         return super().__getattribute__(name)
 
     @classmethod
-    def get_all(cls, spec: SchemaPath) -> Dict[str, OperationSpec]:
+    def get_all(cls, spec: SchemaPath) -> dict[str, OperationSpec]:
         """Builds a dict of all operations in the spec."""
         return {
             op_spec["operationId"]: cls(
@@ -74,10 +74,11 @@ def get_spec_from_file(path: Path) -> dict:
     elif suffix in SpecFileTypes.YAML:
         spec_load = yaml.safe_load
     else:
-        raise RuntimeError(
+        message = (
             f"Unknown specification file type."
             f" Accepted types: {', '.join(chain(*SpecFileTypes))}"
         )
+        raise RuntimeError(message)
 
-    with open(path, encoding="utf-8") as spec_file:
+    with path.open(encoding="utf-8") as spec_file:
         return spec_load(spec_file)

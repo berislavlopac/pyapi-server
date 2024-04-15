@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from functools import wraps
 from http import HTTPStatus
 from importlib import import_module
@@ -9,7 +10,7 @@ from inspect import iscoroutine
 from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Callable, cast, Mapping, Optional, Union
+from typing import cast
 from urllib.parse import urlsplit
 
 from humps import decamelize
@@ -29,14 +30,14 @@ log = getLogger(__name__)
 class Application(Starlette):
     """PyAPI server application."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        spec: Union[SchemaPath, dict],
+        spec: SchemaPath | dict,
         *,
-        module: Optional[Union[str, ModuleType]] = None,
+        module: str | ModuleType | None = None,
         validate_responses: bool = True,
         enforce_case: bool = True,
-        custom_format_validators: Optional[Mapping[str, Callable]] = None,
+        custom_format_validators: Mapping[str, Callable] | None = None,
         spec_url: str = "",
         **kwargs,
     ):
@@ -67,14 +68,11 @@ class Application(Starlette):
                 try:
                     endpoint_fn = getattr(base_module, name)
                 except AttributeError as ex:
-                    raise RuntimeError(
-                        f"The function `{base_module.__name__}.{name}` does not exist!"
-                    ) from ex
+                    message = f"The function `{base_module.__name__}.{name}` does not exist!"
+                    raise RuntimeError(message) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
 
-    def set_endpoint(
-        self, endpoint_fn: Callable, *, operation_id: Optional[str] = None
-    ) -> None:
+    def set_endpoint(self, endpoint_fn: Callable, *, operation_id: str | None = None) -> None:
         """
         Sets endpoint function for a given `operationId`.
 
@@ -98,7 +96,8 @@ class Application(Starlette):
         try:
             operation = self._operations[cast(str, operation_id_key)]
         except KeyError as ex:
-            raise ValueError(f"Unknown operationId: {operation_id}.") from ex
+            message = f"Unknown operationId: {operation_id}."
+            raise ValueError(message) from ex
 
         @wraps(endpoint_fn)
         async def wrapper(request: Request, **kwargs) -> Response:
@@ -124,10 +123,11 @@ class Application(Starlette):
             if isinstance(response, dict):
                 response = JSONResponse(response)
             elif not isinstance(response, Response):
-                raise ValueError(
+                message = (
                     f"The endpoint function `{endpoint_fn.__name__}` must return"
                     " either a dict or a Response instance."
                 )
+                raise TypeError(message)
 
             # TODO: pass a list of operation IDs to specify which responses not to validate
             if self.validate_responses:
@@ -144,7 +144,7 @@ class Application(Starlette):
                 server_path + operation.path, wrapper, [operation.method], name=operation_id
             )
 
-    def endpoint(self, operation_id: Union[Callable, str]):
+    def endpoint(self, operation_id: Callable | str):
         """
         Decorator for setting endpoints.
 
@@ -175,7 +175,7 @@ class Application(Starlette):
         return decorator
 
     @classmethod
-    def from_file(cls, path: Union[Path, str], *args, **kwargs) -> Application:
+    def from_file(cls, path: Path | str, *args, **kwargs) -> Application:
         """
         Creates an instance of the class by loading the spec from a local file.
 
@@ -193,6 +193,7 @@ def _load_module(name: str) -> ModuleType:
     try:
         module = import_module(name)
     except ModuleNotFoundError as ex:
-        raise RuntimeError(f"The module `{name}` does not exist!") from ex
+        message = f"The module `{name}` does not exist!"
+        raise RuntimeError(message) from ex
     else:
         return module

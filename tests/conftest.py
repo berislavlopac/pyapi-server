@@ -7,7 +7,7 @@ import pytest
 @pytest.fixture
 def spec_dict(config):
     file_path = config.test_dir / "openapi.json"
-    with open(file_path) as spec_file:
+    with file_path.open() as spec_file:
         return json.load(spec_file)
 
 

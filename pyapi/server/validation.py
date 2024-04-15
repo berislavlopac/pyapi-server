@@ -1,8 +1,9 @@
 """OpenAPI request and response wrappers; adapted from openapi-core."""
 
+from __future__ import annotations
+
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Union
 
 from openapi_core import protocols
 from openapi_core.validation.request.datatypes import RequestParameters
@@ -16,7 +17,7 @@ class OpenAPIRequest(protocols.Request):
 
     def __init__(self, request: Request):
         self.request = request
-        self._body: Optional[Union[str, bytes]] = None
+        self._body: str | bytes | None = None
         self.parameters = RequestParameters(
             query=self.request.query_params,
             header=self.request.headers,
@@ -50,7 +51,7 @@ class OpenAPIRequest(protocols.Request):
         return self.request.method.lower()
 
     @property
-    def body(self) -> Optional[bytes]:
+    def body(self) -> bytes | None:
         """Return the request body as string, if present."""
         if isinstance(self._body, str):
             return self._body.encode("utf-8")
