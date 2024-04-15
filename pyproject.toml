@@ -1,6 +1,6 @@
 [project]
 name = "pyapi-server"
-version = "0.5.0"
+version = "0.6.0"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 readme = "README.md"
 license = {text = "MIT"}
@@ -9,11 +9,11 @@ authors = [
 ]
 requires-python = ">=3.8,<4.0"
 dependencies = [
-    "PyYAML>=5.4",
-    "stringcase>=1.2.0",
-    "openapi-core>=0.18",
-    "starlette>=0.21.0",
+    "PyYAML>=6.0.1",
+    "openapi-core>=0.19.1",
+    "starlette>=0.37.2",
     "jsonschema-path>=0.3.2",
+    "pyhumps>=3.8.0",
 ]
 
 [project.urls]
@@ -35,40 +35,69 @@ includes = ["pyapi/server/"]
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "pytest-asyncio>=0.18.3",
-    "pytest-cov>=3.0.0",
-    "pytest-flake8>=1.1.1",
-    "pytest-mypy>=0.9.1",
-    "requests>=2.27.1",
-    "pytest>=7.1.1",
-    "pydocstyle>=6.1.1",
+    "pipdeptree>=2.18.1",
+]
+checks = [
     "mypy>=0.942",
-    "toml>=0.10.2",
-    "pytest-spec>=3.2.0",
     "isort>=5.10.1",
+    "ruff>=0.0.253",
+]
+tests = [
+    "pytest>=7.1.1",
+    "pytest-cov>=3.0.0",
+    "pytest-spec>=3.2.0",
+    "pytest-asyncio>=0.18.3",
+    "requests>=2.27.1",
     "tox>=4.4.6",
     "tox-pdm>=0.6.1",
-    "ruff>=0.0.253",
 ]
 docs = [
     "mkdocs>=1.3.0",
-    "mkdocs-material>=8.5.6",
+    "mkdocs-material>=9.5.17",
 ]
 
-[tool.pdm.scripts]
-tests.cmd = "pytest --spec --cov"
-check-lint.shell = """
-    ruff check .
+[tool.pdm.scripts.tests]
+cmd = "pytest --spec --cov"
+help = "Run unit tests and coverage."
+
+[tool.pdm.scripts.tests-quick]
+cmd = "pytest -m 'not api_request'"
+help = "Run unit tests without coverage and API request tests."
+
+[tool.pdm.scripts.check-lint]
+shell = """
     ruff format --check .
     isort --check .
+    ruff check .
 """
-reformat.shell = """
+help = "Run linting and formating checks."
+
+[tool.pdm.scripts.check-typing]
+cmd = "mypy --install-types --non-interactive"
+help = "Run static typing analysis."
+
+[tool.pdm.scripts.checks]
+composite = ["check-lint", "check-typing"]
+help = "Run all checks."
+
+[tool.pdm.scripts.ready]
+composite = ["check-lint", "check-typing", "tests"]
+help = "Run all checks and tests."
+
+[tool.pdm.scripts.reformat]
+shell = """
     isort .
     ruff format .
 """
-check-typing.cmd = "mypy --install-types --non-interactive"
-checks.composite = ["check-lint", "check-typing"]
-new-commits.shell = "git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate"
+help = "Reformat the code using isort and ruff."
+
+[tool.pdm.scripts.reqs]
+shell = "pdm export --prod --without-hashes"
+help = "Extract current production requirements. Save to a file with the `-o` option."
+
+[tool.pdm.scripts.new-commits]
+shell = "git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate"
+help = "List all commits since the last tag."
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

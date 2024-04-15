@@ -12,13 +12,13 @@ from types import ModuleType
 from typing import Any, Callable, cast, Mapping, Optional, Union
 from urllib.parse import urlsplit
 
+from humps import decamelize
 from jsonschema_path import SchemaPath
 from openapi_core import validate_request, validate_response
 from openapi_core.exceptions import OpenAPIError
 from openapi_core.security.exceptions import SecurityProviderError
 from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
-from stringcase import snakecase
 
 from .spec import get_spec_from_file, OperationSpec
 from .validation import JSONResponse, OpenAPIRequest, OpenAPIResponse, Request, Response
@@ -63,7 +63,7 @@ class Application(Starlette):
                 else:
                     base_module = module
                 if self.enforce_case:
-                    name = snakecase(name)
+                    name = decamelize(name)
                 try:
                     endpoint_fn = getattr(base_module, name)
                 except AttributeError as ex:
@@ -90,7 +90,7 @@ class Application(Starlette):
         if operation_id is None:
             operation_id = endpoint_fn.__name__
         if self.enforce_case and operation_id not in self._operations:
-            operation_id_key = {snakecase(op_id): op_id for op_id in self._operations}.get(
+            operation_id_key = {decamelize(op_id): op_id for op_id in self._operations}.get(
                 operation_id
             )
         else:

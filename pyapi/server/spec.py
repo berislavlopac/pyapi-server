@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Callable, Dict, Mapping, Sequence
 
 import yaml
+from humps import camelize
 from jsonschema_path import SchemaPath
-from stringcase import camelcase
 
 
 class OperationSpec:
@@ -38,7 +38,7 @@ class OperationSpec:
         """
         if name in self.spec:
             return self.spec[name]
-        if (camelcase_name := camelcase(name)) in self.spec:
+        if (camelcase_name := camelize(name)) in self.spec:
             return self.spec[camelcase_name]
         return super().__getattribute__(name)
 
