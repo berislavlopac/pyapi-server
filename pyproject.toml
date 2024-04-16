@@ -120,7 +120,6 @@ force_alphabetical_sort_within_sections = true
 
 [tool.ruff]
 line-length = 96
-target-version = "py311"
 output-format = "grouped"
 
 [tool.ruff.lint]
