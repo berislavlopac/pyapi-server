@@ -64,5 +64,5 @@ async def test_server_raises_error_on_invalid_endpoint_function_response(
 
     route, request = _prepare(app, path)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         await route.endpoint(request)
