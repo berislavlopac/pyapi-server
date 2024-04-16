@@ -3,9 +3,9 @@ name = "pyapi-server"
 version = "0.6.0"
 description = "Lightweight API framework using an OpenAPI spec for routing and validation."
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "Berislav Lopac", email = "berislav@lopac.net"},
+    { name = "Berislav Lopac", email = "berislav@lopac.net" },
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
     "openapi-core>=0.19.1",
     "starlette>=0.37.2",
     "jsonschema-path>=0.3.2",
-    "pyhumps>=3.8.0",
+    "stringcase>=1.2.0",
 ]
 
 [project.urls]
@@ -23,7 +23,7 @@ repository = "https://github.com/berislavlopac/pyapi-server"
 
 [project.optional-dependencies]
 uvicorn = [
-  "uvicorn>=0.18.3"
+    "uvicorn>=0.18.3"
 ]
 docs = [
     "mkdocs>=1.3.0",
@@ -103,14 +103,14 @@ help = "List all commits since the last tag."
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = [ "pyapi/", ]
-omit = [ "*/tests/*", ]
+source = ["pyapi/", ]
+omit = ["*/tests/*", ]
 
 [tool.coverage.report]
 skip_covered = false
 show_missing = true
 fail_under = 80
-exclude_lines = [ "pragma: no cover", "@abstract",]
+exclude_lines = ["pragma: no cover", "@abstract", ]
 
 [tool.isort]
 profile = "black"
@@ -123,24 +123,24 @@ line-length = 96
 output-format = "grouped"
 
 [tool.ruff.lint]
-select = [  # see https://docs.astral.sh/ruff/rules/
-    "E4", "E7", "E9",  # basic pycodestyle rules
-    "W",     # pycodestyle warnings
-    "F",     # Pyflakes rules
-    "D",     # pydocstyle checks
-    "N",     # PEP8 naming conventions
-    "PLR",   # Pylint refactoring recommendations
-    "PTH",   # recommends to use pathlib instead of os.path
-    "UP",    # pyupgrade suggestions
-    "BLE",   # locates blind exception capture
-    "B",     # locates possible bugs and design problems
-    "A",     # locates shadowing of builtin names
-    "C4",    # locates possible issues with comprehensions
-    "DTZ",   # locates incorrect use of timezone information
-    "PIE",   # miscellaneous linting rules
-    "TRY",   # locates potential exception handling antipatterns
-    "PERF",  # locates potential performance issues
-    "RUF",   # various Ruff-specific linting rules
+select = [# see https://docs.astral.sh/ruff/rules/
+    "E4", "E7", "E9", # basic pycodestyle rules
+    "W", # pycodestyle warnings
+    "F", # Pyflakes rules
+    "D", # pydocstyle checks
+    "N", # PEP8 naming conventions
+    "PLR", # Pylint refactoring recommendations
+    "PTH", # recommends to use pathlib instead of os.path
+    "UP", # pyupgrade suggestions
+    "BLE", # locates blind exception capture
+    "B", # locates possible bugs and design problems
+    "A", # locates shadowing of builtin names
+    "C4", # locates possible issues with comprehensions
+    "DTZ", # locates incorrect use of timezone information
+    "PIE", # miscellaneous linting rules
+    "TRY", # locates potential exception handling antipatterns
+    "PERF", # locates potential performance issues
+    "RUF", # various Ruff-specific linting rules
 ]
 ignore = ["D107", "D203", "D211", "D212", "D401", "D407", "D413"]
 
