@@ -10,7 +10,7 @@ from inspect import iscoroutine
 from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import cast
+from typing import cast, Literal, Sequence
 from urllib.parse import urlsplit
 
 from jsonschema_path import SchemaPath
@@ -28,16 +28,31 @@ log = getLogger(__name__)
 
 
 class Application(Starlette):
-    """PyAPI server application."""
+    """
+    PyAPI server application.
+
+    Args:
+        spec: OpenAPI specification.
+        module: The module containing the endpoint functions.
+                Can be the module object or the module name.
+        enforce_case: If `True` (the default), the operation IDs will be converted to `snake_case`.
+                      Otherwise, the original format will be retained.
+        custom_format_validators: A mapping of functions that will be called to validate custom formats.
+        skip_response_validation: If `False` (the default), all responses will be validated.
+                                  If `True`, no responses will be validated.
+                                  If a sequence of strings, the responses to corresponding
+                                  operations will not be validated.
+        spec_url: The URL of the OpenAPI specification, if needed.
+    """
 
     def __init__(  # noqa: PLR0913
         self,
         spec: SchemaPath | dict,
         *,
         module: str | ModuleType | None = None,
-        validate_responses: bool = True,
         enforce_case: bool = True,
         custom_format_validators: Mapping[str, Callable] | None = None,
+        skip_response_validation: Sequence[str] | bool = False,
         spec_url: str = "",
         **kwargs,
     ):
@@ -45,9 +60,9 @@ class Application(Starlette):
         if isinstance(spec, dict):
             spec = SchemaPath.from_dict(spec, base_uri=spec_url)
         self.spec: SchemaPath = spec
-        self.validate_responses = validate_responses
         self.enforce_case = enforce_case
         self.custom_format_validators = custom_format_validators
+        self.skip_response_validation = skip_response_validation
 
         self._operations = OperationSpec.get_all(self.spec)
         self._server_paths = {urlsplit(server["url"]).path for server in self.spec["servers"]}
@@ -71,6 +86,11 @@ class Application(Starlette):
                     message = f"The function `{base_module.__name__}.{name}` does not exist!"
                     raise RuntimeError(message) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
+
+    def _to_validate_response_for(self, operation_id: str) -> bool:
+        if not isinstance(self.skip_response_validation, bool):
+            return operation_id in self.skip_response_validation
+        return not self.skip_response_validation
 
     def set_endpoint(self, endpoint_fn: Callable, *, operation_id: str | None = None) -> None:
         """
@@ -129,8 +149,7 @@ class Application(Starlette):
                 )
                 raise TypeError(message)
 
-            # TODO: pass a list of operation IDs to specify which responses not to validate
-            if self.validate_responses:
+            if self._to_validate_response_for(operation_id):
                 validate_response(
                     request=openapi_request,
                     response=OpenAPIResponse(response),

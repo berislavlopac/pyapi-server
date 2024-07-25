@@ -109,7 +109,7 @@ omit = ["*/tests/*", ]
 [tool.coverage.report]
 skip_covered = false
 show_missing = true
-fail_under = 80
+fail_under = 90
 exclude_lines = ["pragma: no cover", "@abstract", ]
 
 [tool.isort]
