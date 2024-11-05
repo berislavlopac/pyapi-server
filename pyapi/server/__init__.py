@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from functools import wraps
 from http import HTTPStatus
 from importlib import import_module
@@ -10,7 +10,7 @@ from inspect import iscoroutine
 from logging import getLogger
 from pathlib import Path
 from types import ModuleType
-from typing import cast, Literal, Sequence
+from typing import cast
 from urllib.parse import urlsplit
 
 from jsonschema_path import SchemaPath

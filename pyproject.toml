@@ -7,7 +7,7 @@ license = { text = "MIT" }
 authors = [
     { name = "Berislav Lopac", email = "berislav@lopac.net" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "PyYAML>=6.0.1",
     "openapi-core>=0.19.1",
@@ -101,6 +101,7 @@ help = "List all commits since the last tag."
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 source = ["pyapi/", ]
