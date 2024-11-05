@@ -56,49 +56,6 @@ tests = [
     "tox-pdm>=0.6.1",
 ]
 
-[tool.pdm.scripts.tests]
-cmd = "pytest --spec --cov"
-help = "Run unit tests and coverage."
-
-[tool.pdm.scripts.tests-quick]
-cmd = "pytest -m 'not api_request'"
-help = "Run unit tests without coverage and API request tests."
-
-[tool.pdm.scripts.check-lint]
-shell = """
-    ruff format --check .
-    isort --check .
-    ruff check .
-"""
-help = "Run linting and formating checks."
-
-[tool.pdm.scripts.check-typing]
-cmd = "mypy --install-types --non-interactive"
-help = "Run static typing analysis."
-
-[tool.pdm.scripts.checks]
-composite = ["check-lint", "check-typing"]
-help = "Run all checks."
-
-[tool.pdm.scripts.ready]
-composite = ["check-lint", "check-typing", "tests"]
-help = "Run all checks and tests."
-
-[tool.pdm.scripts.reformat]
-shell = """
-    isort .
-    ruff format .
-"""
-help = "Reformat the code using isort and ruff."
-
-[tool.pdm.scripts.reqs]
-shell = "pdm export --prod --without-hashes"
-help = "Extract current production requirements. Save to a file with the `-o` option."
-
-[tool.pdm.scripts.new-commits]
-shell = "git log $(git describe --tags --abbrev=0)..HEAD --oneline --no-decorate"
-help = "List all commits since the last tag."
-
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
@@ -126,22 +83,24 @@ output-format = "grouped"
 [tool.ruff.lint]
 select = [# see https://docs.astral.sh/ruff/rules/
     "E4", "E7", "E9", # basic pycodestyle rules
-    "W", # pycodestyle warnings
-    "F", # Pyflakes rules
-    "D", # pydocstyle checks
-    "N", # PEP8 naming conventions
-    "PLR", # Pylint refactoring recommendations
-    "PTH", # recommends to use pathlib instead of os.path
-    "UP", # pyupgrade suggestions
-    "BLE", # locates blind exception capture
-    "B", # locates possible bugs and design problems
-    "A", # locates shadowing of builtin names
-    "C4", # locates possible issues with comprehensions
-    "DTZ", # locates incorrect use of timezone information
-    "PIE", # miscellaneous linting rules
-    "TRY", # locates potential exception handling antipatterns
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes rules
+    "D",    # pydocstyle checks
+    "N",    # PEP8 naming conventions
+    "PLR",  # Pylint refactoring recommendations
+    "PTH",  # recommends to use pathlib instead of os.path
+    "UP",   # pyupgrade suggestions
+    "BLE",  # locates blind exception capture
+    "B",    # locates possible bugs and design problems
+    "A",    # locates shadowing of builtin names
+    "C4",   # locates possible issues with comprehensions
+    "DTZ",  # locates incorrect use of timezone information
+    "PIE",  # miscellaneous linting rules
+    "TRY",  # locates potential exception handling antipatterns
     "PERF", # locates potential performance issues
-    "RUF", # various Ruff-specific linting rules
+    "RUF",  # various Ruff-specific linting rules
+    "S",    # various insecure code, with bandit
+
 ]
 ignore = ["D107", "D203", "D211", "D212", "D401", "D407", "D413"]
 
