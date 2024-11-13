@@ -16,8 +16,8 @@ blocks:
     task:
       prologue:
         commands:
-          - sem-version python 3.8
-          - python -m pip install -U pip pdm tox tox-pdm
+          - sem-version python 3.12
+          - python -m pip install -U pip pdm tox tox-pdm rust-just
       jobs:
         - name: checks
           commands:
@@ -31,13 +31,12 @@ blocks:
       prologue:
         commands:
           - sem-version python $PY_VERSION
-          - python -m pip install -U pip pdm tox tox-pdm
+          - python -m pip install -U pip pdm tox tox-pdm rust-just
       jobs:
         - name: tests
           matrix:
             - env_var: PY_VERSION
               values:
-                - '3.8'
                 - '3.9'
                 - '3.10'
                 - '3.11'
@@ -58,7 +57,7 @@ blocks:
         - name: pypi-credentials
       prologue:
         commands:
-          - sem-version python 3.8
+          - sem-version python 3.12
           - python -m pip install -U pip pdm
       jobs:
         - name: Build and upload Python package

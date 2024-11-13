@@ -3,34 +3,34 @@ help:
     @just --list --unsorted
 
 # Run all unit tests and coverage.
-tests:
-    pytest --spec --cov
+test:
+    pdm run pytest --spec --cov
 
 # Run unit tests without coverage and special formatting.
-tests-quick:
-    pytest
+test-quickly:
+    pdm run pytest
 
 # Run linting and formating checks.
 check-lint:
-    ruff format --check .
-    isort --check .
-    ruff check .
+    pdm run ruff format --check .
+    pdm run isort --check .
+    pdm run ruff check .
 
 # Run static typing analysis.
 check-typing:
-    mypy --install-types --non-interactive
+    pdm run mypy --install-types --non-interactive
 
 # Run all checks.
-checks: check-lint check-typing
+check: check-lint check-typing
 
 # Run all checks and tests.
-ready: checks tests
+ready: check test
 
 # Reformat the code using isort and ruff.
 [confirm]
 reformat:
-    isort .
-    ruff format .
+    pdm run isort .
+    pdm run ruff format .
 
 # Extract current production requirements. Save to a file by appending `> requirements.txt`.
 reqs:
