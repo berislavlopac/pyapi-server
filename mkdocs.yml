@@ -1,4 +1,6 @@
 site_name: PyAPI Server
+nav:
+  - Introduction: 'index.md'
 site_url: https://pyapi-server.readthedocs.io
 repo_url: https://github.com/berislavlopac/pyapi-server
 site_description: Lightweight API framework using an OpenAPI spec for routing and validation.
@@ -7,11 +9,18 @@ theme:
   name: material
   icon:
     logo: material/power-socket-uk
+  features:
+    - content.tooltips
+    - navigation.expand
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+plugins:
+  - search
+  - mkapi
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-nav:
-  - Introduction: 'index.md'
