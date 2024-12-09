@@ -54,6 +54,7 @@ class Application(Starlette):
         custom_format_validators: Mapping[str, Callable] | None = None,
         skip_response_validation: Sequence[str] | bool = False,
         spec_url: str = "",
+        error_handler: str = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -86,6 +87,11 @@ class Application(Starlette):
                     message = f"The function `{base_module.__name__}.{name}` does not exist!"
                     raise RuntimeError(message) from ex
                 self.set_endpoint(endpoint_fn, operation_id=operation_id)
+        if error_handler is not None:
+            if isinstance(error_handler, str):
+                if "." in error_handler:
+                    base, name = error_handler.rsplit(".", 1)
+                    self.error_fn = getattr(_load_module(base), name)
 
     def _to_validate_response_for(self, operation_id: str) -> bool:
         if not isinstance(self.skip_response_validation, bool):
@@ -129,13 +135,15 @@ class Application(Starlette):
                     extra_format_validators=self.custom_format_validators,
                 )
             except SecurityProviderError as ex:
-                if self.debug:
-                    log.exception("Invalid security")
-                raise HTTPException(HTTPStatus.FORBIDDEN, "Invalid security.") from ex
+                if hasattr(self, "error_fn"):
+                    return self.error_fn(request, ex)
+                else:
+                    raise HTTPException(HTTPStatus.FORBIDDEN, "Invalid security.") from ex
             except OpenAPIError as ex:
-                if self.debug:
-                    log.exception("Bad request")
-                raise HTTPException(HTTPStatus.BAD_REQUEST, "Bad request") from ex
+                if hasattr(self, "error_fn"):
+                    return self.error_fn(request, ex)
+                else:
+                    raise HTTPException(HTTPStatus.BAD_REQUEST, "Bad request") from ex
 
             response = endpoint_fn(request, **kwargs)
             if iscoroutine(response):
