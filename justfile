@@ -1,40 +1,46 @@
+
 # List available recipes.
 help:
     @just --list --unsorted
 
 # Run all unit tests and coverage.
 test:
-    pdm run pytest --spec --cov
+    uv run pytest --spec --cov
 
 # Run unit tests without coverage and special formatting.
-test-quickly:
-    pdm run pytest
+qtest:
+    uv run pytest
 
 # Run linting and formating checks.
-check-lint:
-    pdm run ruff format --check .
-    pdm run isort --check .
-    pdm run ruff check .
+lint:
+    uv run ruff format --check .
+    uv run ruff check .
+
+# Run security and safety checks.
+safety:
+    uv run vulture  --exclude .venv --min-confidence 100 .
+    uv run radon mi --show --multi --min B .
 
 # Run static typing analysis.
-check-typing:
-    pdm run mypy --install-types --non-interactive
+type:
+    uv run mypy --install-types --non-interactive
 
 # Run all checks.
-check: check-lint check-typing
+check: lint type
+#check: lint safety type
 
 # Run all checks and tests.
 ready: check test
 
-# Reformat the code using isort and ruff.
+# Reformat the code using ruff.
 [confirm]
 reformat:
-    pdm run isort .
-    pdm run ruff format .
+    uv run ruff format .
+    uv run ruff check --select I --fix .
 
 # Extract current production requirements. Save to a file by appending `> requirements.txt`.
 reqs:
-    pdm export --prod --without-hashes
+    uv export --no-dev
 
 # List all commits since the last tag.
 new-commits:

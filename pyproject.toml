@@ -7,7 +7,8 @@ license = { text = "MIT" }
 authors = [
     { name = "Berislav Lopac", email = "berislav@lopac.net" },
 ]
-requires-python = ">=3.9"
+
+requires-python = ">=3.10"
 dependencies = [
     "PyYAML>=6.0.1",
     "openapi-core>=0.19.1",
@@ -16,10 +17,11 @@ dependencies = [
     "stringcase>=1.2.0",
 ]
 [dependency-groups]
-checks = [
-    "mypy>=0.942",
-    "ruff>=0.0.253",
-    "isort>=5.13.2"
+dev = [
+    "mypy>=1.18.2",
+    "pip>=25.2",
+    "ruff>=0.14.0",
+    "vulture>=2.14",
 ]
 docs = [
     "mkdocs-material>=9.5.44",
@@ -35,6 +37,17 @@ tests = [
     "tox-pdm>=0.6.1"
 ]
 
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+includes = ["pyapi/server/"]
+
+[tool.uv]
+package = true
+default-groups = "all"
+
 [project.urls]
 homepage = "https://pyapi-server.readthedocs.io"
 documentation = "https://pyapi-server.readthedocs.io"
@@ -44,13 +57,6 @@ repository = "https://github.com/berislavlopac/pyapi-server"
 uvicorn = [
     "uvicorn>=0.18.3"
 ]
-
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.build]
-includes = ["pyapi/server/"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -66,46 +72,83 @@ show_missing = true
 fail_under = 90
 exclude_lines = ["pragma: no cover", "@abstract", ]
 
-[tool.isort]
-profile = "black"
-line_length = 96
-filter_files = true
-force_alphabetical_sort_within_sections = true
+[tool.mypy]
+mypy_path = "pyapi/"
+files = ["pyapi/"]
+ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 96
 output-format = "grouped"
 
 [tool.ruff.lint]
-select = [# see https://docs.astral.sh/ruff/rules/
-    "E4", "E7", "E9", # basic pycodestyle rules
-    "W",    # pycodestyle warnings
-    "F",    # Pyflakes rules
-    "D",    # pydocstyle checks
-    "N",    # PEP8 naming conventions
-    "PLR",  # Pylint refactoring recommendations
-    "PTH",  # recommends to use pathlib instead of os.path
-    "UP",   # pyupgrade suggestions
-    "BLE",  # locates blind exception capture
-    "B",    # locates possible bugs and design problems
-    "A",    # locates shadowing of builtin names
-    "C4",   # locates possible issues with comprehensions
-    "DTZ",  # locates incorrect use of timezone information
-    "PIE",  # miscellaneous linting rules
-    "TRY",  # locates potential exception handling antipatterns
-    "PERF", # locates potential performance issues
-    "RUF",  # various Ruff-specific linting rules
-    "S",    # various insecure code, with bandit
-
+select = [  # see https://docs.astral.sh/ruff/rules/
+    "E4", "E7", "E9",  # basic pycodestyle rules
+    "W",        # pycodestyle warnings
+    "F",        # Pyflakes rules
+    "D",        # pydocstyle checks
+    "N",        # PEP8 naming conventions
+    "W",        # pycodestyle warnings
+    "C90",      # McCabe complexity
+    "N",        # PEP8 naming conventions
+    "I",        # import statements linting and formatting
+    "PLR",      # Pylint refactoring recommendations
+    "PTH",      # recommends to use pathlib instead of os.path
+    "UP",       # pyupgrade suggestions
+    "BLE",      # locates blind exception capture
+    "B",        # locates possible bugs and design problems
+    "A",        # locates shadowing of builtin names
+    "C4",       # locates possible issues with comprehensions
+    "DTZ",      # locates incorrect use of timezone information
+    "PIE",      # miscellaneous linting rules
+    "TRY",      # locates potential exception handling antipatterns
+    "PERF",     # locates potential performance issues
+    "RUF",      # various Ruff-specific linting rules
+    "S",        # various insecure code, with bandit
+    "ERA",      # eradicate: commented-out code
 ]
-ignore = ["D107", "D203", "D211", "D212", "D401", "D407", "D413"]
+external = [
+    "F841",     # vulture uses this code for ignoring unused names
+]
+ignore = [
+    "D107",     # allow missing docstring in __init__
+    "D203",     # ignore due to conflict with D211
+    "D212",     # ignore due to conflict with D213
+    "D401",
+    "D413",     # allow missing blank line after last section
+]
 
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/*" = ["D", "N802", "S101"]
-"example/*" = ["D"]
+"__init__.py" = [
+    "F401",     # allow unused imports
+    "F403",     # allow `import *`
+]
+"tests/*" = [
+    "D",        # skip pydocstyle checks
+    "PLR0913",  # unlimited function arguments
+    "S101",     # allow asserts
+    "S105",     # allow harcoded passwords
+    "N802",     # allow variable case in test names
+    "PLR2004",  # allow magic values in comparisons
+    "S311"      # allow random generator
+]
+"example/*" = [
+    "D",        # skip pydocstyle checks
+]
 
-[tool.mypy]
-mypy_path = "pyapi/"
-files = ["pyapi/"]
-ignore_missing_imports = true
+[tool.ruff.lint.isort]
+# see https://docs.astral.sh/ruff/settings/#lintisort
+known-first-party = ["pyapi"]
+
+[tool.ruff.lint.pylint]
+max-args = 6
+
+[tool.ruff.format]
+# see https://docs.astral.sh/ruff/settings/#format
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false

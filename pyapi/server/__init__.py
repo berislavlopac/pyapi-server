@@ -21,7 +21,7 @@ from starlette.applications import Starlette
 from starlette.exceptions import HTTPException
 from stringcase import snakecase
 
-from .spec import get_spec_from_file, OperationSpec
+from .spec import OperationSpec, get_spec_from_file
 from .validation import JSONResponse, OpenAPIRequest, OpenAPIResponse, Request, Response
 
 log = getLogger(__name__)
@@ -92,7 +92,7 @@ class Application(Starlette):
             return operation_id in self.skip_response_validation
         return not self.skip_response_validation
 
-    def set_endpoint(self, endpoint_fn: Callable, *, operation_id: str | None = None) -> None:
+    def set_endpoint(self, endpoint_fn: Callable, *, operation_id: str | None = None) -> None:  # noqa: C901
         """
         Sets endpoint function for a given `operationId`.
 
