@@ -7,6 +7,20 @@ license = { text = "MIT" }
 authors = [
     { name = "Berislav Lopac", email = "berislav@lopac.net" },
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Starlette",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: ASGI",
+    "Topic :: Internet :: WWW/HTTP",
+]
 
 requires-python = ">=3.10"
 dependencies = [
@@ -38,11 +52,20 @@ tests = [
 ]
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
-[tool.pdm.build]
-includes = ["pyapi/server/"]
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build]
+packages = ["pyapi"]
+
+[tool.uv-dynamic-versioning]
+pattern = "default-unprefixed"
+pattern-prefix = "release-"
+latest-tag = true
+strict = true
 
 [tool.uv]
 package = true

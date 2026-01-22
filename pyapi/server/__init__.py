@@ -45,7 +45,7 @@ class Application(Starlette):
         spec_url: The URL of the OpenAPI specification, if needed.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         spec: SchemaPath | dict,
         *,
